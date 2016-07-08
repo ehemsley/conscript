@@ -1,10 +1,16 @@
 var fs = require('fs')
 
 Token = {
-  EOF: 0,
-  ASSIGN_OP: 1,
-  ID: 2,
-  NUM: 3
+  EOF: -1,
+  ID: -2,
+  NUM: -3,
+  ASSIGN_OP: -4,
+  ADD_OP: -5,
+  SUB_OP: -6,
+  MULT_OP: -7,
+  DIV_OP: -8,
+  LEFT_PAREN: -9,
+  RIGHT_PAREN: -10
 }
 
 function tokenize(string) {
@@ -20,32 +26,60 @@ function tokenize(string) {
 
     if (isLetter(char)) {
       var id_str = char;
-      index += 1;
-      while (isLetter(string[index])) {
-        id_str += string[index];
-        index += 1;
+      var id_index = index;
+      id_index += 1;
+      while (isLetter(string[id_index])) {
+        id_str += string[id_index];
+        id_index += 1;
       }
-      tokens.push(Token.ID);
+      index = id_index - 1;
+      tokens.push([id_str, Token.ID]);
     }
 
     else if (isNum(char)) {
-      var num = char;
-      index += 1;
-      while (isNum(string[index])) {
-        num += string[index];
-        index += 1;
+      var num_str = char;
+      var num_index = index;
+      num_index += 1;
+      while (isNum(string[num_index])) {
+        num_str += string[num_index];
+        num_index += 1;
       }
-      tokens.push(Token.NUM);
+      index = num_index - 1;
+      tokens.push([num_str, Token.NUM]);
     }
 
     else if (isEquals(char)) {
-      tokens.push(Token.ASSIGN_OP);
+      tokens.push([char, Token.ASSIGN_OP]);
+    }
+
+    else if (isAdd(char)) {
+      tokens.push([char, Token.ADD_OP]);
+    }
+
+    else if (isSub(char)) {
+      tokens.push([char, Token.SUB_OP]);
+    }
+
+    else if (isMult(char)) {
+      tokens.push([char, Token.MULT_OP]);
+    }
+
+    else if (isDiv(char)) {
+      tokens.push([char, Token.DIV_OP]);
+    }
+
+    else if (isLeftParen(char)) {
+      tokens.push([char, Token.LEFT_PAREN]);
+    }
+
+    else if (isRightParen(char)) {
+      tokens.push([char, Token.RIGHT_PAREN]);
     }
 
     index += 1;
   }
 
-  tokens.push(Token.EOF);
+  tokens.push(['EOF', Token.EOF]);
   return tokens;
 }
 
@@ -58,7 +92,31 @@ function isNum(char) {
 }
 
 function isEquals(char) {
-  return char.match(/=/);
+  return char == "=";
+}
+
+function isAdd(char) {
+  return char == "+";
+}
+
+function isSub(char) {
+  return char == "-";
+}
+
+function isMult(char) {
+  return char == "*";
+}
+
+function isDiv(char) {
+  return char == "/";
+}
+
+function isLeftParen(char) {
+  return char == "(";
+}
+
+function isRightParen(char) {
+  return char == ")";
 }
 
 if (process.argv.length <= 2) {

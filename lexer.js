@@ -13,112 +13,114 @@ Token = {
   RIGHT_PAREN: -10
 }
 
-function tokenize(string) {
-  var tokens = [];
-  var index = 0;
-  while (index < string.length) {
-    var char = string[index];
+module.exports = {
+  tokenize: function(string) {
+    var tokens = [];
+    var index = 0;
+    while (index < string.length) {
+      var char = string[index];
 
-    while (char == " ") {
-      index += 1;
-      char = string[index];
-    }
+      while (char == " ") {
+        index += 1;
+        char = string[index];
+      }
 
-    if (isLetter(char)) {
-      var id_str = char;
-      var id_index = index;
-      id_index += 1;
-      while (isLetter(string[id_index])) {
-        id_str += string[id_index];
+      if (this.isLetter(char)) {
+        var id_str = char;
+        var id_index = index;
         id_index += 1;
+        while (this.isLetter(string[id_index])) {
+          id_str += string[id_index];
+          id_index += 1;
+        }
+        index = id_index - 1;
+        tokens.push({ lexeme: id_str, code: Token.ID });
       }
-      index = id_index - 1;
-      tokens.push([id_str, Token.ID]);
-    }
 
-    else if (isNum(char)) {
-      var num_str = char;
-      var num_index = index;
-      num_index += 1;
-      while (isNum(string[num_index])) {
-        num_str += string[num_index];
+      else if (this.isNum(char)) {
+        var num_str = char;
+        var num_index = index;
         num_index += 1;
+        while (this.isNum(string[num_index])) {
+          num_str += string[num_index];
+          num_index += 1;
+        }
+        index = num_index - 1;
+        tokens.push({ lexeme: num_str, code: Token.NUM });
       }
-      index = num_index - 1;
-      tokens.push([num_str, Token.NUM]);
+
+      else if (this.isEqualsOperator(char)) {
+        tokens.push({ lexeme: char, code: Token.ASSIGN_OP });
+      }
+
+      else if (this.isAddOperator(char)) {
+        tokens.push({ lexeme: char, code: Token.ADD_OP });
+      }
+
+      else if (this.isSubtractOperator(char)) {
+        tokens.push({ lexeme: char, code: Token.SUB_OP });
+      }
+
+      else if (this.isMultiplyOperator(char)) {
+        tokens.push({ lexeme: char, code: Token.MULT_OP });
+      }
+
+      else if (this.isDivideOperator(char)) {
+        tokens.push({ lexeme: char, code: Token.DIV_OP });
+      }
+
+      else if (this.isLeftParen(char)) {
+        tokens.push({ lexeme: char, code: Token.LEFT_PAREN });
+      }
+
+      else if (this.isRightParen(char)) {
+        tokens.push({ lexeme: char, code: Token.RIGHT_PAREN });
+      }
+
+      index += 1;
     }
 
-    else if (isEquals(char)) {
-      tokens.push([char, Token.ASSIGN_OP]);
-    }
+    tokens.push(['EOF', Token.EOF]);
+    return tokens;
+  },
 
-    else if (isAdd(char)) {
-      tokens.push([char, Token.ADD_OP]);
-    }
+  isLetter: function(char) {
+    return /[a-zA-z]/.test(char);
+  },
 
-    else if (isSub(char)) {
-      tokens.push([char, Token.SUB_OP]);
-    }
+  isNum: function(char) {
+    return /[0-9]/.test(char);
+  },
 
-    else if (isMult(char)) {
-      tokens.push([char, Token.MULT_OP]);
-    }
+  isEqualsOperator: function(char) {
+    return char == "=";
+  },
 
-    else if (isDiv(char)) {
-      tokens.push([char, Token.DIV_OP]);
-    }
+  isAddOperator: function(char) {
+    return char == "+";
+  },
 
-    else if (isLeftParen(char)) {
-      tokens.push([char, Token.LEFT_PAREN]);
-    }
+  isSubtractOperator: function(char) {
+    return char == "-";
+  },
 
-    else if (isRightParen(char)) {
-      tokens.push([char, Token.RIGHT_PAREN]);
-    }
+  isMultiplyOperator: function(char) {
+    return char == "*";
+  },
 
-    index += 1;
+  isDivideOperator: function(char) {
+    return char == "/";
+  },
+
+  isLeftParen: function(char) {
+    return char == "(";
+  },
+
+  isRightParen: function(char) {
+    return char == ")";
   }
-
-  tokens.push(['EOF', Token.EOF]);
-  return tokens;
 }
-
-function isLetter(char) {
-  return char.match(/[a-zA-z]/);
-}
-
-function isNum(char) {
-  return char.match(/[0-9]/);
-}
-
-function isEquals(char) {
-  return char == "=";
-}
-
-function isAdd(char) {
-  return char == "+";
-}
-
-function isSub(char) {
-  return char == "-";
-}
-
-function isMult(char) {
-  return char == "*";
-}
-
-function isDiv(char) {
-  return char == "/";
-}
-
-function isLeftParen(char) {
-  return char == "(";
-}
-
-function isRightParen(char) {
-  return char == ")";
-}
-
+/*
 if (process.argv.length <= 2) {
   console.log("Usage: node lexer.js <file>");
   process.exit(-1);
@@ -129,3 +131,4 @@ var filename = process.argv[2];
 var contents = fs.readFileSync(filename, 'utf8');
 var tokens = tokenize(contents);
 console.log(tokens);
+*/

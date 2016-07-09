@@ -1,17 +1,5 @@
 var fs = require('fs')
-
-Token = {
-  EOF: -1,
-  ID: -2,
-  NUM: -3,
-  ASSIGN_OP: -4,
-  ADD_OP: -5,
-  SUB_OP: -6,
-  MULT_OP: -7,
-  DIV_OP: -8,
-  LEFT_PAREN: -9,
-  RIGHT_PAREN: -10
-}
+const Token = require('./token.js');
 
 module.exports = {
   tokenize: function(string) {
@@ -80,7 +68,7 @@ module.exports = {
       index += 1;
     }
 
-    tokens.push(['EOF', Token.EOF]);
+    tokens.push({ lexeme: 'EOF', code: Token.EOF});
     return tokens;
   },
 

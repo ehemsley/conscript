@@ -1,5 +1,6 @@
 var assert = require('chai').assert;
 const lexer = require('../lexer.js');
+const Token = require('../token.js');
 
 describe('lexer', function() {
   describe('tokenize', function() {
@@ -8,6 +9,11 @@ describe('lexer', function() {
     it('should generate the correct amount of tokens', function() {
       assert.lengthOf(tokens, 16);
     });
+
+    it ('should end with an EOF token', function() {
+      assert.equal(tokens[15].lexeme, "EOF");
+      assert.equal(tokens[15].code, Token.EOF);
+    })
 
     describe('identifiers', function() {
       it('should generate the correct lexeme for an identifier', function() {

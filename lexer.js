@@ -120,15 +120,3 @@ module.exports = {
     return char == ")";
   }
 }
-/*
-if (process.argv.length <= 2) {
-  console.log("Usage: node lexer.js <file>");
-  process.exit(-1);
-}
-
-var filename = process.argv[2];
-
-var contents = fs.readFileSync(filename, 'utf8');
-var tokens = tokenize(contents);
-console.log(tokens);
-*/

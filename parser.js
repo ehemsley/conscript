@@ -1,3 +1,10 @@
+// i hate this parser architecture because it's impossible
+// to test the parts individually. need to think of a better
+// design.
+
+// TODO: log things with a queue object that outputs when everything
+// is finished instead of spewing out garbage throughout the process
+
 const ast = require('./ast.js');
 const Token = require('./token.js');
 
@@ -86,7 +93,7 @@ module.exports = {
 
     function tokenPrecedence() {
       var precedence_value = PRECEDENCE.get(currentToken.code);
-      if (precedence_value == undefined) return -1;
+      if (precedence_value == undefined) return 0;
       return precedence_value;
     }
 
@@ -97,7 +104,7 @@ module.exports = {
     }
 
     function parseBinaryOperationRightSide(expressionPrecedence, left) {
-      while (1) {
+      while (1) { //horrible
         var precedence = tokenPrecedence();
         if (precedence < expressionPrecedence) {
           return left;
@@ -125,7 +132,7 @@ module.exports = {
         return LogError("expected function name in prototype");
       }
 
-      var functionName = currenToken.lexeme;
+      var functionName = currentToken.lexeme;
       nextToken();
 
       if (currentToken.code !== Token.LEFT_PAREN) {
@@ -160,8 +167,7 @@ module.exports = {
     function parseTopLevelExpression() {
       var e;
       if (e = parseExpression()) {
-        var prototype = new ast.PrototypeNode("__anon_expr", []);
-        return new ast.FunctionNode(prototype, e);
+        return new ast.SelfInvokingFunctionNode([], e);
       }
       return null;
     }
@@ -187,10 +193,10 @@ module.exports = {
     function main() {
       var expressions = [];
       while (true) {
-        console.log("ready");
-        console.log(currentToken);
-        if (currentToken.code === Token.EOF) {
-          console.log("done");
+        if (currentToken === undefined) {
+          console.log("Error: unexpected end of file");
+          return null;
+        } else if (currentToken.code === Token.EOF) {
           return expressions;
         } else {
           expressions.push(handleTopLevelExpression());
@@ -199,6 +205,6 @@ module.exports = {
     }
 
     var result = main();
-    console.log(result);
+    return result;
   }
 }

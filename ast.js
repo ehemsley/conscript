@@ -1,4 +1,5 @@
 const Token = require('./token.js');
+const Logger = require('./logger.js');
 
 module.exports = {
   NumberExpressionNode: function(value) {
@@ -24,11 +25,17 @@ module.exports = {
 
     this.codegen = function() {
       if (this.operator === Token.ASSIGN_OP) {
-        return this.left.codegen() + "  = " + this.right.codegen() + ";";
+        return this.left.codegen() + "  = " + this.right.codegen();
       } else if (this.operator === Token.ADD_OP) {
-        return this.left.codegen() + " + " + this.right.codegen() + ";";
+        return this.left.codegen() + " + " + this.right.codegen();
+      } else if (this.operator === Token.SUB_OP) {
+        return this.left.codegen() + " - " + this.right.codegen();
+      } else if (this.operator === Token.MULT_OP) {
+        return this.left.codegen() + " * " + this.right.codegen();
+      } else if (this.operator === Token.DIV_OP) {
+        return this.left.codegen() + " / " + this.right.codegen();
       } else {
-        return LogError("invalid binary operator: " + this.operator);
+        return undefined;
       }
     };
   },
@@ -44,6 +51,21 @@ module.exports = {
       }
 
       return this.callee.prototype.name + "(" + argumentCodes.toString() + ");";
+    };
+  },
+
+  ExpressionSequenceNode: function(expressions) {
+    this.expressions = expressions;
+
+    this.codegen = function() {
+      var code = "";
+      for (var i = 0; i < this.expressions.length; i++) {
+        if (i == this.expressions.length - 1) {
+          code += "return ";
+        }
+        code += this.expressions[i].codegen() + ";";
+      }
+      return code;
     };
   },
 
@@ -64,7 +86,7 @@ module.exports = {
       var prototypeCode = this.prototype.codegen();
       var bodyCode = this.body.codegen();
       return "{" + prototypeCode + bodyCode + "}";
-    }
+    };
   },
 
   SelfInvokingFunctionNode: function(args, body) {
@@ -74,6 +96,6 @@ module.exports = {
     this.codegen = function() {
       var bodyCode = this.body.codegen();
       return "(function(" + this.args.toString() + ") {" + bodyCode + "})(" + this.args.toString() + ");";
-    }
+    };
   }
 }

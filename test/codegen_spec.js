@@ -7,7 +7,7 @@ const codegen = require('../codegen.js');
 describe('codegen', function() {
   describe('generate', function() {
     it('should wrap naked expressions in a self-invoking function', function(){
-      assert.equal(codegen.generate(parser.parse(lexer.tokenize("12 + 1234"))), "(function() {12 + 1234;})();");
+      assert.equal(codegen.generate(parser.parse(lexer.tokenize("12 + 1234"))), "(function() {return 12 + 1234;})();");
     });
   });
 });

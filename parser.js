@@ -2,21 +2,22 @@
 // to test the parts individually. need to think of a better
 // design.
 
-// TODO: log things with a queue object that outputs when everything
-// is finished instead of spewing out garbage throughout the process
-
 const ast = require('./ast.js');
 const Token = require('./token.js');
+const Logger = require('./logger.js');
 
 const PRECEDENCE = new Map([
   [Token.ADD_OP, 20],
   [Token.SUB_OP, 20],
   [Token.MULT_OP, 40],
-  [Token.DIV_OP, 40]
+  [Token.DIV_OP, 40],
+  [Token.ASSIGN_OP, 1]
 ]);
 
 module.exports = {
-  parse: function(tokens) {
+  parse: function(tokens, verbose) {
+    var verbose = typeof verbose !== 'undefined' ?  verbose : true;
+
     var index = 0;
     var currentToken = tokens[index];
 
@@ -24,11 +25,6 @@ module.exports = {
       index += 1;
       currentToken = tokens[index];
       return currentToken;
-    }
-
-    function LogError(string) {
-      console.log("Error: " + string);
-      return null;
     }
 
     function parseNumberExpression() {
@@ -41,7 +37,10 @@ module.exports = {
       nextToken();
       var expr = parseExpression();
       if (!expr) { return null; }
-      if (currentToken !== ')') { return LogError("expected ')'"); }
+      if (currentToken !== ')') {
+        Logger.LogError("expected ')'");
+        return null;
+      }
       nextToken();
     }
 
@@ -67,7 +66,8 @@ module.exports = {
           }
 
           if (currentToken.code != Token.COMMA) {
-            return LogError("expected ')' or ',' in argument list");
+            Logger.LogError("expected ')' or ',' in argument list");
+            return null;
           }
 
           nextToken();
@@ -87,13 +87,14 @@ module.exports = {
       } else if (currentToken.code == Token.LEFT_PAREN) {
         return parseParenExpression();
       } else {
-        return LogError("unknown token; expected expression");
+        Logger.LogError("unknown token; expected expression");
+        return null;
       }
     }
 
     function tokenPrecedence() {
       var precedence_value = PRECEDENCE.get(currentToken.code);
-      if (precedence_value == undefined) return 0;
+      if (precedence_value == undefined) return -1;
       return precedence_value;
     }
 
@@ -104,7 +105,7 @@ module.exports = {
     }
 
     function parseBinaryOperationRightSide(expressionPrecedence, left) {
-      while (1) { //horrible
+      while (true) { //horrible
         var precedence = tokenPrecedence();
         if (precedence < expressionPrecedence) {
           return left;
@@ -112,6 +113,7 @@ module.exports = {
 
         var binaryOperation = currentToken;
         nextToken();
+
         var right = parsePrimary();
         if (!right) { return null; }
 
@@ -123,20 +125,22 @@ module.exports = {
 
         // this might not work, in the example this functioned
         // by reassigning the left pointer to the following binary node
-        return new ast.BinaryExpressionNode(binaryOperation.code, left, right);
+        left = new ast.BinaryExpressionNode(binaryOperation.code, left, right);
       }
     }
 
     function parsePrototype() {
       if (currentToken.code !== Token.ID) {
-        return LogError("expected function name in prototype");
+        Logger.LogError("expected function name in prototype");
+        return null;
       }
 
       var functionName = currentToken.lexeme;
       nextToken();
 
       if (currentToken.code !== Token.LEFT_PAREN) {
-        return LogError("expected '(' in prototype");
+        Logger.LogError("expected '(' in prototype");
+        return null;
       }
 
       var argumentNames = [];
@@ -145,7 +149,8 @@ module.exports = {
       }
 
       if (currentToken.code !== Token.RIGHT_PAREN) {
-        return LogError("expected ')' in prototype");
+        Logger.LogError("expected ')' in prototype");
+        return null;
       }
 
       nextToken();
@@ -159,7 +164,7 @@ module.exports = {
       if (!prototype) { return null; }
       var e;
       if (e = parseExpression) {
-        return new ast.FunctionNode(prototype, e);
+        return new ast.FunctionNode(prototype, E);
       }
       return null;
     }
@@ -167,15 +172,15 @@ module.exports = {
     function parseTopLevelExpression() {
       var e;
       if (e = parseExpression()) {
-        return new ast.SelfInvokingFunctionNode([], e);
+        var expressionSequence = new ast.ExpressionSequenceNode([e]);
+        return new ast.SelfInvokingFunctionNode([], expressionSequence);
       }
       return null;
     }
 
     function handleDefinition() {
-      if (parseDefinition()) {
-        console.log("parsed a function definition");
-      } else {
+      var result = parseDefinition();
+      if (result !== null) {
         nextToken();
       }
     }
@@ -183,7 +188,6 @@ module.exports = {
     function handleTopLevelExpression() {
       var result;
       if (result = parseTopLevelExpression()) {
-        console.log("parsed a top-level expression");
         return result;
       } else {
         nextToken();
@@ -194,7 +198,7 @@ module.exports = {
       var expressions = [];
       while (true) {
         if (currentToken === undefined) {
-          console.log("Error: unexpected end of file");
+          Logger.LogError("Error: unexpected end of file");
           return null;
         } else if (currentToken.code === Token.EOF) {
           return expressions;
@@ -205,6 +209,10 @@ module.exports = {
     }
 
     var result = main();
+    if (verbose) {
+      var errors = Logger.Errors();
+      if (errors !== "") { console.log(Logger.Errors()); }
+    }
     return result;
   }
 }

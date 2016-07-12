@@ -1,5 +1,5 @@
 var assert = require('chai').assert;
-const ast = require('../ast.js');
+const ast = require('../src/ast.js');
 
 describe('ast', function() {
   describe('NumberExpressionNode', function() {

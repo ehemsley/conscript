@@ -1,9 +1,9 @@
 var assert = require('chai').assert;
-const Token = require('../token.js');
-const ast = require('../ast.js');
-const parser = require('../parser.js');
-const lexer = require('../lexer.js');
-const Logger = require('../logger.js');
+const Token = require('../src/token.js');
+const ast = require('../src/ast.js');
+const parser = require('../src/parser.js');
+const lexer = require('../src/lexer.js');
+const Logger = require('../src/logger.js');
 
 describe('parser', function() {
   describe('parse', function() {

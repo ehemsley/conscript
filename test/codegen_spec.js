@@ -1,8 +1,8 @@
 var assert = require('chai').assert;
-const ast = require('../ast.js');
-const parser = require('../parser.js');
-const lexer = require('../lexer.js');
-const codegen = require('../codegen.js');
+const ast = require('../src/ast.js');
+const parser = require('../src/parser.js');
+const lexer = require('../src/lexer.js');
+const codegen = require('../src/codegen.js');
 
 describe('codegen', function() {
   describe('generate', function() {

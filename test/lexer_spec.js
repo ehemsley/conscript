@@ -1,6 +1,6 @@
 var assert = require('chai').assert;
-const lexer = require('../lexer.js');
-const Token = require('../token.js');
+const lexer = require('../src/lexer.js');
+const Token = require('../src/token.js');
 
 describe('lexer', function() {
   describe('tokenize', function() {

@@ -1,19 +1,16 @@
 const Token = require('./token.js');
+const Codegen = require('./codegen.js');
 const Logger = require('./logger.js');
 
 module.exports = {
   NumberExpressionNode: function(value) {
     this.value = value;
-    this.codegen = function() {
-      return this.value;
-    };
+    this.codegen = Codegen.generateNumberExpressionCode;
   },
 
   VariableExpressionNode: function(name) {
     this.name = name;
-    this.codegen = function() {
-      return this.name;
-    };
+    this.codegen = Codegen.generateVariableExpressionCode;
   },
 
   BinaryExpressionNode: function(operator, left, right) {
@@ -22,36 +19,14 @@ module.exports = {
     this.left.parent = this;
     this.right = right;
     this.right.parent = this;
-
-    this.codegen = function() {
-      if (this.operator === Token.ASSIGN_OP) {
-        return this.left.codegen() + "  = " + this.right.codegen();
-      } else if (this.operator === Token.ADD_OP) {
-        return this.left.codegen() + " + " + this.right.codegen();
-      } else if (this.operator === Token.SUB_OP) {
-        return this.left.codegen() + " - " + this.right.codegen();
-      } else if (this.operator === Token.MULT_OP) {
-        return this.left.codegen() + " * " + this.right.codegen();
-      } else if (this.operator === Token.DIV_OP) {
-        return this.left.codegen() + " / " + this.right.codegen();
-      } else {
-        return undefined;
-      }
-    };
+    this.codegen = Codegen.generateBinaryExpressionCode;
   },
 
   CallExpressionNode: function(callee, args) {
     this.callee = callee;
     this.args = args;
 
-    this.codegen = function() {
-      var argumentCodes = [];
-      for (var i = 0; i < this.args.length; i++) {
-        argumentCodes.push(this.args[i].codegen());
-      }
-
-      return this.callee.prototype.name + "(" + argumentCodes.toString() + ");";
-    };
+    this.codegen = Codegen.generateCallExpressionCode;
   },
 
   ExpressionSequenceNode: function(expressions) {
@@ -74,7 +49,12 @@ module.exports = {
     this.args = args;
 
     this.codegen = function() {
-      return "function " + this.name + " ( " + this.args.toString() + ");";//prototype!!";
+      var code = "function " + this.name + " ( ";
+      for (var i = 0; i < this.args.length; i++) {
+         code += this.args[i].codegen();
+      }
+      code += ");"
+      return code;
     };
   },
 

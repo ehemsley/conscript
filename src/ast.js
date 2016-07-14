@@ -1,19 +1,16 @@
 const Token = require('./token.js');
+const Codegen = require('./codegen.js');
 const Logger = require('./logger.js');
 
 module.exports = {
   NumberExpressionNode: function(value) {
     this.value = value;
-    this.codegen = function() {
-      return this.value;
-    };
+    this.codegen = Codegen.generateNumberExpressionCode;
   },
 
   VariableExpressionNode: function(name) {
     this.name = name;
-    this.codegen = function() {
-      return this.name;
-    };
+    this.codegen = Codegen.generateVariableExpressionCode;
   },
 
   BinaryExpressionNode: function(operator, left, right) {
@@ -22,80 +19,36 @@ module.exports = {
     this.left.parent = this;
     this.right = right;
     this.right.parent = this;
-
-    this.codegen = function() {
-      if (this.operator === Token.ASSIGN_OP) {
-        return this.left.codegen() + "  = " + this.right.codegen();
-      } else if (this.operator === Token.ADD_OP) {
-        return this.left.codegen() + " + " + this.right.codegen();
-      } else if (this.operator === Token.SUB_OP) {
-        return this.left.codegen() + " - " + this.right.codegen();
-      } else if (this.operator === Token.MULT_OP) {
-        return this.left.codegen() + " * " + this.right.codegen();
-      } else if (this.operator === Token.DIV_OP) {
-        return this.left.codegen() + " / " + this.right.codegen();
-      } else {
-        return undefined;
-      }
-    };
+    this.codegen = Codegen.generateBinaryExpressionCode;
   },
 
   CallExpressionNode: function(callee, args) {
     this.callee = callee;
     this.args = args;
-
-    this.codegen = function() {
-      var argumentCodes = [];
-      for (var i = 0; i < this.args.length; i++) {
-        argumentCodes.push(this.args[i].codegen());
-      }
-
-      return this.callee.prototype.name + "(" + argumentCodes.toString() + ");";
-    };
+    this.codegen = Codegen.generateCallExpressionCode;
   },
 
   ExpressionSequenceNode: function(expressions) {
     this.expressions = expressions;
-
-    this.codegen = function() {
-      var code = "";
-      for (var i = 0; i < this.expressions.length; i++) {
-        if (i == this.expressions.length - 1) {
-          code += "return ";
-        }
-        code += this.expressions[i].codegen() + ";";
-      }
-      return code;
-    };
+    this.codegen = Codegen.generateExpressionSequenceCode;
   },
 
   PrototypeNode: function(name, args) {
     this.name = name;
     this.args = args;
-
-    this.codegen = function() {
-      return "function " + this.name + " ( " + this.args.toString() + ");";//prototype!!";
-    };
+    this.codegen = Codegen.generatePrototypeCode;
   },
 
   FunctionNode: function(prototype, body) {
     this.prototype = prototype;
     this.body = body;
-
-    this.codegen = function() {
-      var prototypeCode = this.prototype.codegen();
-      var bodyCode = this.body.codegen();
-      return "{" + prototypeCode + bodyCode + "}";
-    };
+    this.codegen = Codegen.generateFunctionCode;
   },
 
-  SelfInvokingFunctionNode: function(args, body) {
-    this.args = args;
+  SelfInvokingFunctionNode: function(body, prototypeArgs, callArgs) {
     this.body = body;
-
-    this.codegen = function() {
-      var bodyCode = this.body.codegen();
-      return "(function(" + this.args.toString() + ") {" + bodyCode + "})(" + this.args.toString() + ");";
-    };
+    this.prototypeArgs = typeof prototypeArgs !== 'undefined' ?  prototypeArgs : [];
+    this.callArgs = typeof callArgs !== 'undefined' ? callArgs : [];
+    this.codegen = Codegen.generateSelfInvokingFunctionCode;
   }
 }

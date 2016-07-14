@@ -173,7 +173,7 @@ module.exports = {
       var e;
       if (e = parseExpression()) {
         var expressionSequence = new ast.ExpressionSequenceNode([e]);
-        return new ast.SelfInvokingFunctionNode([], expressionSequence);
+        return new ast.SelfInvokingFunctionNode(expressionSequence);
       }
       return null;
     }

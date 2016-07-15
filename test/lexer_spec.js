@@ -117,13 +117,21 @@ describe('lexer', function() {
     });
   });
 
-  describe('isLetter', function() {
+  describe('isValidIdentifierChar', function() {
     it('should return true if the char is a letter', function() {
-      assert.equal(lexer.isLetter("a"), true);
+      assert.equal(lexer.isValidIdentifierChar("a"), true);
+    });
+
+    it('should return true if the char is a capital letter', function() {
+      assert.equal(lexer.isValidIdentifierChar("F"), true);
     });
 
     it('should return false if the char is not a letter', function() {
-      assert.equal(lexer.isLetter("1"), false);
+      assert.equal(lexer.isValidIdentifierChar("1"), false);
+    });
+
+    it('should return true if the char is an underscore', function() {
+      assert.equal(lexer.isValidIdentifierChar('_'), true);
     });
   });
 
@@ -144,66 +152,6 @@ describe('lexer', function() {
 
     it('should return false if the char is not an equals sign', function() {
       assert.equal(lexer.isEqualsSign("?"), false);
-    });
-  });
-
-  describe('isAddOperator', function() {
-    it('should return true if the char is an addition operator', function() {
-      assert.equal(lexer.isAddOperator("+"), true);
-    });
-
-    it('should return false if the char is not an addition operator', function() {
-      assert.equal(lexer.isAddOperator("/"), false);
-    });
-  });
-
-  describe('isSubtractOperator', function() {
-    it('should return true if the char is a subtract operator', function() {
-      assert.equal(lexer.isSubtractOperator("-"), true);
-    });
-
-    it('should return false if the char is not a subtract operator', function() {
-      assert.equal(lexer.isSubtractOperator("*"), false);
-    });
-  });
-
-  describe('isMultiplyOperator', function() {
-    it('should return true if the char is a multiply operator', function() {
-      assert.equal(lexer.isMultiplyOperator("*"), true);
-    });
-
-    it('should return false if the char is not a multiply operator', function() {
-      assert.equal(lexer.isMultiplyOperator("+"), false);
-    });
-  });
-
-  describe('isDivideOperator', function() {
-    it('should return true if the char is a divide operator', function() {
-      assert.equal(lexer.isDivideOperator("/"), true);
-    });
-
-    it('should return false if the char is not a divide operator', function() {
-      assert.equal(lexer.isDivideOperator("-"), false);
-    });
-  });
-
-  describe('isLeftParen', function() {
-    it('should return true if the char is a left parenthesis', function() {
-      assert.equal(lexer.isLeftParen("("), true);
-    });
-
-    it('should return false if the char is not a left parenthesis', function() {
-      assert.equal(lexer.isLeftParen("z"), false);
-    });
-  });
-
-  describe('isRightParen', function() {
-    it('should return true if the char is a right parenthesis', function() {
-      assert.equal(lexer.isRightParen(")"), true);
-    });
-
-    it('should return false if the char is not a right parenthesis', function() {
-      assert.equal(lexer.isRightParen("-"), false);
     });
   });
 });

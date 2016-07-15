@@ -48,6 +48,11 @@ describe('codegen', function() {
       var secondBinaryExpression = new ast.BinaryExpressionNode(Token.ADD_OP, firstBinaryExpression, new ast.NumberExpressionNode(5));
       assert.equal(secondBinaryExpression.codegen(), '10 * 3 + 5');
     });
+
+    it('should generate proper code with comparison operation', function() {
+      var comparisonExpression = new ast.BinaryExpressionNode(Token.COMPARISON_OP, new ast.VariableExpressionNode("id"), new ast.NumberExpressionNode(6));
+      assert.equal(comparisonExpression.codegen(), 'id === 6');
+    });
   });
 
   describe('generateCallExpressionCode', function() {

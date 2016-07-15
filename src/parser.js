@@ -11,6 +11,7 @@ const PRECEDENCE = new Map([
   [Token.SUB_OP, 20],
   [Token.MULT_OP, 40],
   [Token.DIV_OP, 40],
+  [Token.COMPARISON_OP, 10],
   [Token.ASSIGN_OP, 1]
 ]);
 
@@ -123,8 +124,6 @@ module.exports = {
           if (!right) { return null; }
         }
 
-        // this might not work, in the example this functioned
-        // by reassigning the left pointer to the following binary node
         left = new ast.BinaryExpressionNode(binaryOperation.code, left, right);
       }
     }

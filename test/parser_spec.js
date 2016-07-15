@@ -21,6 +21,11 @@ describe('parser', function() {
       assert.equal(result.body.expressions[0].left.operator, Token.DIV_OP);
     });
 
+    it('should correctly parse a comparison operation', function() {
+      var result = parser.parse(lexer.tokenize("id == 4"), false)[0];
+      assert.equal(result.body.expressions[0].operator, Token.COMPARISON_OP);
+    });
+
     it('should fail gracefully when a binary operator does not have two arguments', function() {
       parser.parse(lexer.tokenize("12 +"), false);
       assert.include(Logger.Errors(), "unknown token; expected expression")

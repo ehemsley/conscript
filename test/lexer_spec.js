@@ -21,7 +21,7 @@ describe('lexer', function() {
       });
 
       it('should generate the correct token code for an identifier', function() {
-        assert.equal(tokens[0].code, -2);
+        assert.equal(tokens[0].code, Token.ID);
       });
     });
 
@@ -31,7 +31,7 @@ describe('lexer', function() {
       });
 
       it('should generate the correct token code for a number', function() {
-        assert.equal(tokens[2].code, -3);
+        assert.equal(tokens[2].code, Token.NUM);
       });
     });
 
@@ -41,7 +41,18 @@ describe('lexer', function() {
       });
 
       it('should generate the correct token code for an assignment operator', function() {
-        assert.equal(tokens[1].code, -4);
+        assert.equal(tokens[1].code, Token.ASSIGN_OP);
+      });
+    });
+
+    describe('comparison', function() {
+      var tokens = lexer.tokenize("id == 4");
+      it('should generate the correct lexeme for a comparison operator', function() {
+        assert.equal(tokens[1].lexeme, "==");
+      });
+
+      it('should generate the correct token code for a comparison operator', function() {
+        assert.equal(tokens[1].code, Token.COMPARISON_OP);
       });
     });
 
@@ -51,7 +62,7 @@ describe('lexer', function() {
       });
 
       it('should generate the correct token code for an assignment operator', function() {
-        assert.equal(tokens[3].code, -5);
+        assert.equal(tokens[3].code, Token.ADD_OP);
       });
     });
 
@@ -61,7 +72,7 @@ describe('lexer', function() {
       });
 
       it('should generate the correct token code for a subtration operator', function() {
-        assert.equal(tokens[5].code, -6);
+        assert.equal(tokens[5].code, Token.SUB_OP);
       });
     });
 
@@ -71,7 +82,7 @@ describe('lexer', function() {
       });
 
       it('should generate the correct token code for a multiply operator', function() {
-        assert.equal(tokens[9].code, -7);
+        assert.equal(tokens[9].code, Token.MULT_OP);
       });
     });
 
@@ -81,7 +92,7 @@ describe('lexer', function() {
       });
 
       it('should generate the correct token code for a divide operator', function() {
-        assert.equal(tokens[12].code, -8);
+        assert.equal(tokens[12].code, Token.DIV_OP);
       });
     });
 
@@ -91,7 +102,7 @@ describe('lexer', function() {
       });
 
       it('should generate the correct token code for a left paren', function() {
-        assert.equal(tokens[7].code, -9);
+        assert.equal(tokens[7].code, Token.LEFT_PAREN);
       });
     });
 
@@ -101,7 +112,7 @@ describe('lexer', function() {
       });
 
       it('should generate the correct token code for a right paren', function() {
-        assert.equal(tokens[14].code, -10);
+        assert.equal(tokens[14].code, Token.RIGHT_PAREN);
       });
     });
   });
@@ -126,13 +137,13 @@ describe('lexer', function() {
     });
   });
 
-  describe('isEqualsOperator', function() {
-    it('should return true if the char is an equals operator', function() {
-      assert.equal(lexer.isEqualsOperator("="), true);
+  describe('isEqualsSign', function() {
+    it('should return true if the char is an equals sign', function() {
+      assert.equal(lexer.isEqualsSign("="), true);
     });
 
-    it('should return false if the char is not an equals operator', function() {
-      assert.equal(lexer.isEqualsOperator("?"), false);
+    it('should return false if the char is not an equals sign', function() {
+      assert.equal(lexer.isEqualsSign("?"), false);
     });
   });
 

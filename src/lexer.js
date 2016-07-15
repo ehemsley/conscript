@@ -37,8 +37,13 @@ module.exports = {
         tokens.push({ lexeme: num_str, code: Token.NUM });
       }
 
-      else if (this.isEqualsOperator(char)) {
-        tokens.push({ lexeme: char, code: Token.ASSIGN_OP });
+      else if (this.isEqualsSign(char)) {
+        if (this.isEqualsSign(string[index + 1])) {
+          tokens.push({ lexeme: "==", code: Token.COMPARISON_OP });
+          index += 1;
+        } else {
+          tokens.push({ lexeme: "=", code: Token.ASSIGN_OP });
+        }
       }
 
       else if (this.isAddOperator(char)) {
@@ -80,31 +85,31 @@ module.exports = {
     return /[0-9]/.test(char);
   },
 
-  isEqualsOperator: function(char) {
-    return char == "=";
+  isEqualsSign: function(char) {
+    return char === "=";
   },
 
   isAddOperator: function(char) {
-    return char == "+";
+    return char === "+";
   },
 
   isSubtractOperator: function(char) {
-    return char == "-";
+    return char === "-";
   },
 
   isMultiplyOperator: function(char) {
-    return char == "*";
+    return char === "*";
   },
 
   isDivideOperator: function(char) {
-    return char == "/";
+    return char === "/";
   },
 
   isLeftParen: function(char) {
-    return char == "(";
+    return char === "(";
   },
 
   isRightParen: function(char) {
-    return char == ")";
+    return char === ")";
   }
 }

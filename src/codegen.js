@@ -28,6 +28,8 @@ module.exports = {
       return this.left.codegen() + " * " + this.right.codegen();
     } else if (this.operator === Token.DIV_OP) {
       return this.left.codegen() + " / " + this.right.codegen();
+    } else if (this.operator === Token.COMPARISON_OP) {
+      return this.left.codegen() + " === " + this.right.codegen();
     } else {
       return undefined;
     }

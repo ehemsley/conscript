@@ -79,7 +79,7 @@ module.exports = {
       }
 
       return process();
-    })(this);
+    }(this));
   },
 
   isValidIdentifierChar: function(char) {

@@ -1,84 +1,89 @@
 var fs = require('fs')
+const Logger = require('./logger.js');
 const Token = require('./token.js');
+
+const CHAR_TO_TOKEN = new Map([
+  ['+', Token.ADD_OP],
+  ['-', Token.SUB_OP],
+  ['*', Token.MULT_OP],
+  ['/', Token.DIV_OP],
+  ['(', Token.LEFT_PAREN],
+  [')', Token.RIGHT_PAREN]
+]);
 
 module.exports = {
   tokenize: function(string) {
     var tokens = [];
+
     var index = 0;
-    while (index < string.length) {
-      var char = string[index];
+    var chars = string.split("");
+    var currentChar = chars[index];
 
-      while (char == " ") {
+    return (function (_this) {
+      function nextChar() {
         index += 1;
-        char = string[index];
+        currentChar = chars[index];
+        return currentChar;
       }
 
-      if (this.isLetter(char)) {
-        var id_str = char;
-        var id_index = index;
-        id_index += 1;
-        while (this.isLetter(string[id_index])) {
-          id_str += string[id_index];
-          id_index += 1;
+      function processToken() {
+        var result = CHAR_TO_TOKEN.get(currentChar);
+        if (result === undefined) {
+          if (_this.isValidIdentifierChar(currentChar)) {
+            buildIdentifierToken();
+          } else if (_this.isNum(currentChar)) {
+            buildNumberToken();
+          } else if (_this.isEqualsSign(currentChar)) {
+            buildEqualsToken();
+          } else {
+            Logger.LogError("LexerError: Unknown character");
+            nextChar();
+          }
+        } else {
+          tokens.push({ lexeme: currentChar, code: result });
+          nextChar();
         }
-        index = id_index - 1;
-        tokens.push({ lexeme: id_str, code: Token.ID });
       }
 
-      else if (this.isNum(char)) {
-        var num_str = char;
-        var num_index = index;
-        num_index += 1;
-        while (this.isNum(string[num_index])) {
-          num_str += string[num_index];
-          num_index += 1;
+      function buildIdentifierToken() {
+        var identifier_string = currentChar;
+        while (_this.isValidIdentifierChar(nextChar())) {
+          identifier_string += currentChar;
         }
-        index = num_index - 1;
-        tokens.push({ lexeme: num_str, code: Token.NUM });
+        tokens.push({ lexeme: identifier_string, code: Token.ID });
       }
 
-      else if (this.isEqualsSign(char)) {
-        if (this.isEqualsSign(string[index + 1])) {
+      function buildNumberToken() {
+        var number_string = currentChar;
+        while (_this.isNum(nextChar())) {
+          number_string += currentChar;
+        }
+        tokens.push({ lexeme: number_string, code: Token.NUM });
+      }
+
+      function buildEqualsToken() {
+        if (nextChar() === "=") {
           tokens.push({ lexeme: "==", code: Token.COMPARISON_OP });
-          index += 1;
+          nextChar();
         } else {
           tokens.push({ lexeme: "=", code: Token.ASSIGN_OP });
         }
       }
 
-      else if (this.isAddOperator(char)) {
-        tokens.push({ lexeme: char, code: Token.ADD_OP });
+      function process() {
+        while (index < chars.length) {
+          processToken();
+        }
+        tokens.push({ lexeme: 'EOF', code: Token.EOF });
+        return tokens;
       }
 
-      else if (this.isSubtractOperator(char)) {
-        tokens.push({ lexeme: char, code: Token.SUB_OP });
-      }
-
-      else if (this.isMultiplyOperator(char)) {
-        tokens.push({ lexeme: char, code: Token.MULT_OP });
-      }
-
-      else if (this.isDivideOperator(char)) {
-        tokens.push({ lexeme: char, code: Token.DIV_OP });
-      }
-
-      else if (this.isLeftParen(char)) {
-        tokens.push({ lexeme: char, code: Token.LEFT_PAREN });
-      }
-
-      else if (this.isRightParen(char)) {
-        tokens.push({ lexeme: char, code: Token.RIGHT_PAREN });
-      }
-
-      index += 1;
-    }
-
-    tokens.push({ lexeme: 'EOF', code: Token.EOF});
-    return tokens;
+      return process();
+    })(this);
   },
 
-  isLetter: function(char) {
-    return /[a-zA-z]/.test(char);
+  isValidIdentifierChar: function(char) {
+    return /[a-zA-z_]/.test(char);
   },
 
   isNum: function(char) {
@@ -87,29 +92,5 @@ module.exports = {
 
   isEqualsSign: function(char) {
     return char === "=";
-  },
-
-  isAddOperator: function(char) {
-    return char === "+";
-  },
-
-  isSubtractOperator: function(char) {
-    return char === "-";
-  },
-
-  isMultiplyOperator: function(char) {
-    return char === "*";
-  },
-
-  isDivideOperator: function(char) {
-    return char === "/";
-  },
-
-  isLeftParen: function(char) {
-    return char === "(";
-  },
-
-  isRightParen: function(char) {
-    return char === ")";
   }
 }

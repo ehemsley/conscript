@@ -30,9 +30,9 @@ module.exports = {
         var result = CHAR_TO_TOKEN.get(currentChar);
         if (result === undefined) {
           if (_this.isValidIdentifierChar(currentChar)) {
-            buildIdentifierToken();
+            buildAlphaNumericToken(_this.isValidIdentifierChar, Token.ID);
           } else if (_this.isNum(currentChar)) {
-            buildNumberToken();
+            buildAlphaNumericToken(_this.isNum, Token.NUM);
           } else if (_this.isEqualsSign(currentChar)) {
             buildEqualsToken();
           } else {
@@ -45,20 +45,12 @@ module.exports = {
         }
       }
 
-      function buildIdentifierToken() {
-        var identifier_string = currentChar;
-        while (_this.isValidIdentifierChar(nextChar())) {
-          identifier_string += currentChar;
+      function buildAlphaNumericToken(testFunction, tokenCode) {
+        var tokenString = currentChar;
+        while(testFunction(nextChar())) {
+          tokenString += currentChar;
         }
-        tokens.push({ lexeme: identifier_string, code: Token.ID });
-      }
-
-      function buildNumberToken() {
-        var number_string = currentChar;
-        while (_this.isNum(nextChar())) {
-          number_string += currentChar;
-        }
-        tokens.push({ lexeme: number_string, code: Token.NUM });
+        tokens.push({ lexeme: tokenString, code: tokenCode })
       }
 
       function buildEqualsToken() {

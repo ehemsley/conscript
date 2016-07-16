@@ -9,6 +9,8 @@ const OPERATOR_TO_CODE = new Map([
   [Token.COMPARISON_OP, "==="]
 ]);
 
+var tabLevel = 0;
+
 function generateArgumentCode(args) {
   var code = "";
   for (var i = 0; i < args.length; i++) {
@@ -16,6 +18,14 @@ function generateArgumentCode(args) {
     if (i !== args.length - 1) { code += ", "; }
   }
   return code;
+}
+
+function generateTabSpaces() {
+  var spaces = ""
+  for (var i = 0; i < tabLevel; i++) {
+    spaces += "  ";
+  }
+  return spaces;
 }
 
 module.exports = {
@@ -46,11 +56,11 @@ module.exports = {
 
   generateExpressionSequenceCode: function() {
     var code = "";
-    for (var i = 0; i < this.expressions.length; i++) {
-      if (i === this.expressions.length - 1) {
-        code += "return ";
-      }
-      code += this.expressions[i].codegen() + ";\n";
+    for (var i = 0; i < this.expressions.length - 1; i++) {
+      code += generateTabSpaces() + this.expressions[i].codegen() + ";\n";
+    }
+    if (this.expressions.length > 0) {
+      code += generateTabSpaces() + "return " + this.expressions[this.expressions.length - 1].codegen() + ";\n";
     }
     return code;
   },
@@ -71,7 +81,9 @@ module.exports = {
 
   generateFunctionCode: function() {
     var prototypeCode = this.prototype.codegen();
+    tabLevel += 1;
     var bodyCode = this.body.codegen();
+    tabLevel -= 1;
     return prototypeCode.slice(0, -1) + " {\n" + bodyCode + "}";
   },
 

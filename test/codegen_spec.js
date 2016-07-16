@@ -125,7 +125,7 @@ describe('codegen', function() {
       var secondExpression = new ast.BinaryExpressionNode(Token.ADD_OP, new ast.VariableExpressionNode("myVar"), new ast.NumberExpressionNode(4));
       var expressionSequenceNode = new ast.ExpressionSequenceNode([firstExpression, secondExpression]);
       var functionNode = new ast.FunctionNode(prototypeNode, expressionSequenceNode);
-      assert.equal(functionNode.codegen(), "function myFun() {\nmyVar = 3;\nreturn myVar + 4;\n}");
+      assert.equal(functionNode.codegen(), "function myFun() {\n  myVar = 3;\n  return myVar + 4;\n}");
     });
 
     it('should generate proper function code with expression sequence and arguments', function() {
@@ -134,7 +134,7 @@ describe('codegen', function() {
       var secondExpression = new ast.BinaryExpressionNode(Token.ADD_OP, new ast.VariableExpressionNode("myVar"), new ast.NumberExpressionNode(4));
       var expressionSequenceNode = new ast.ExpressionSequenceNode([firstExpression, secondExpression]);
       var functionNode = new ast.FunctionNode(prototypeNode, expressionSequenceNode);
-      assert.equal(functionNode.codegen(), "function myFun(myArg) {\nmyVar = 3;\nreturn myVar + 4;\n}");
+      assert.equal(functionNode.codegen(), "function myFun(myArg) {\n  myVar = 3;\n  return myVar + 4;\n}");
     });
   });
 

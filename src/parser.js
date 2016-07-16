@@ -131,13 +131,12 @@ module.exports = {
 
         var right = parsePrimary();
         if (!right) {
-          Logger.LogError("ParseError: expected expression");
           return null;
         }
 
         var nextPrecedence = tokenPrecedence();
         if (precedence < nextPrecedence) {
-          var right = parseBinaryOperationRightSide(tokenPrecedence + 1, right);
+          right = parseBinaryOperationRightSide(precedence + 1, right);
           if (!right) { return null; }
         }
 
@@ -170,11 +169,6 @@ module.exports = {
           }
         }
       }
-      /*
-      while (nextToken().code === Token.ID) {
-        argumentNames.push(currentToken.lexeme);
-      }
-      */
 
       if (currentToken.code !== Token.RIGHT_PAREN) {
         Logger.LogError("expected ')' in prototype");

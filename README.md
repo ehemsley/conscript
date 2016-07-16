@@ -10,5 +10,4 @@ npm install -g mocha
 npm install chai
 ```
 
-run tests:
-```mocha```
+run tests: `mocha`

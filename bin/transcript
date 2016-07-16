@@ -1,0 +1,17 @@
+#!/usr/bin/env node
+
+var fs = require('fs');
+var program = require('commander');
+var transcript = require('../src/transcript.js');
+
+program
+  .version('0.0.1')
+  .usage('<file>')
+  .arguments('<file>')
+  .action(function(file) {
+    // this should probably become a buffer at some point
+    var contents = fs.readFileSync(file).toString();
+    var compiledCode = transcript.compile(contents);
+    console.log(compiledCode);
+  })
+  .parse(process.argv);

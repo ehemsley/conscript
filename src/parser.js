@@ -229,6 +229,7 @@ module.exports = {
     function main() {
       var expressions = [];
       while (true) {
+        consumeNewlineTokens();
         if (currentToken === undefined) {
           Logger.LogError("Error: unexpected end of file");
           return null;

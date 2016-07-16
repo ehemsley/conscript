@@ -1,6 +1,12 @@
 { "name": "transcript",
   "description": "a homebrew language that compiles to javascript",
   "version": "0.0.1",
+  "bin": {
+    "transcript": "./bin/transcript"
+  },
+  "dependencies": {
+    "commander": "^2.9.0"
+  },
   "devDependencies": {
     "mocha": "~2.5.3",
     "chai": "~3.5.0"

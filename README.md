@@ -5,8 +5,11 @@ A homebrew language that compiles to Javascript.
 
 ## testing
 install the `mocha` test framework with `chai` assertion:
+
 `npm install -g mocha`
+
 `npm install chai`
 
 run tests:
+
 `mocha`

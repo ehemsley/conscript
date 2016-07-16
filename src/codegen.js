@@ -1,5 +1,23 @@
 const Token = require('./token.js');
 
+const OPERATOR_TO_CODE = new Map([
+  [Token.ASSIGN_OP, "="],
+  [Token.ADD_OP, "+"],
+  [Token.SUB_OP, "-"],
+  [Token.MULT_OP, "*"],
+  [Token.DIV_OP, "/"],
+  [Token.COMPARISON_OP, "==="]
+]);
+
+function generateArgumentCode(args) {
+  var code = "";
+  for (var i = 0; i < args.length; i++) {
+    code += args[i].codegen();
+    if (i !== args.length - 1) { code += ", "; }
+  }
+  return code;
+}
+
 module.exports = {
   generate: function(ast) {
     var output = "";
@@ -18,27 +36,18 @@ module.exports = {
   },
 
   generateBinaryExpressionCode: function() {
-    if (this.operator === Token.ASSIGN_OP) {
-      return this.left.codegen() + " = " + this.right.codegen();
-    } else if (this.operator === Token.ADD_OP) {
-      return this.left.codegen() + " + " + this.right.codegen();
-    } else if (this.operator === Token.SUB_OP) {
-      return this.left.codegen() + " - " + this.right.codegen();
-    } else if (this.operator === Token.MULT_OP) {
-      return this.left.codegen() + " * " + this.right.codegen();
-    } else if (this.operator === Token.DIV_OP) {
-      return this.left.codegen() + " / " + this.right.codegen();
-    } else if (this.operator === Token.COMPARISON_OP) {
-      return this.left.codegen() + " === " + this.right.codegen();
-    } else {
-      return undefined;
+    var operatorCode = OPERATOR_TO_CODE.get(this.operator);
+    if (operatorCode === undefined) {
+      Logger.LogError("Error: unknown operator");
+      return null;
     }
+    return this.left.codegen() + " " + operatorCode + " " + this.right.codegen();
   },
 
   generateExpressionSequenceCode: function() {
     var code = "";
     for (var i = 0; i < this.expressions.length; i++) {
-      if (i == this.expressions.length - 1) {
+      if (i === this.expressions.length - 1) {
         code += "return ";
       }
       code += this.expressions[i].codegen() + ";\n";
@@ -48,20 +57,14 @@ module.exports = {
 
   generateCallExpressionCode: function() {
     var code = this.callee.prototype.name + "(";
-    for (var i = 0; i < this.args.length; i++) {
-      code += this.args[i].codegen();
-      if (i !== this.args.length - 1) { code += ", "; } // common pattern, should abstract it
-    }
+    code += generateArgumentCode(this.args);
     code += ");";
     return code;
   },
 
   generatePrototypeCode: function() {
     var code = "function " + this.name + "(";
-    for (var i = 0; i < this.args.length; i++) {
-       code += this.args[i].codegen();
-       if (i !== this.args.length - 1) { code += ", "; }
-    }
+    code += generateArgumentCode(this.args);
     code += ");"
     return code;
   },
@@ -74,17 +77,11 @@ module.exports = {
 
   generateSelfInvokingFunctionCode: function() {
     var code = "(function(";
-    for (var i = 0; i < this.prototypeArgs.length; i++) {
-      code += this.prototypeArgs[i].codegen();
-      if (i !== this.prototypeArgs.length - 1) { code += ", "; }
-    }
+    code += generateArgumentCode(this.prototypeArgs);
     code += ") {\n";
     code += this.body.codegen();
     code += "})("
-    for (var i = 0; i < this.callArgs.length; i++) {
-      code += this.callArgs[i].codegen();
-      if (i !== this.callArgs.length - 1) { code += ", "; }
-    }
+    code += generateArgumentCode(this.callArgs);
     code += ");"
     return code;
   }

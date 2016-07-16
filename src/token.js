@@ -9,5 +9,11 @@ module.exports = {
   MULT_OP: -8,
   DIV_OP: -9,
   LEFT_PAREN: -10,
-  RIGHT_PAREN: -11
+  RIGHT_PAREN: -11,
+  LEFT_BRACKET: -12,
+  RIGHT_BRACKET: -13,
+  COMMA: -14,
+  NEWLINE: -15,
+  FUNCTION_KEYWORD: -16,
+  END_KEYWORD: -17
 }

@@ -115,6 +115,72 @@ describe('lexer', function() {
         assert.equal(tokens[14].code, Token.RIGHT_PAREN);
       });
     });
+
+    describe('left bracket', function() {
+      var tokens = lexer.tokenize("myArray = [1,2]");
+      it('should generate the correct lexeme for a left bracket', function() {
+        assert.equal(tokens[2].lexeme, "[");
+      });
+
+      it('should generate the correct token code for a left bracket', function() {
+        assert.equal(tokens[2].code, Token.LEFT_BRACKET);
+      });
+    });
+
+    describe('right bracket', function() {
+      var tokens = lexer.tokenize("myArray = [1,2]");
+      it('should generate the correct lexeme for a right bracket', function() {
+        assert.equal(tokens[6].lexeme, "]");
+      });
+
+      it('should generate the correct token code for a right bracket', function() {
+        assert.equal(tokens[6].code, Token.RIGHT_BRACKET);
+      });
+    });
+
+    describe('comma', function() {
+      var tokens = lexer.tokenize("myArray = [1,2]");
+      it('should generate the correct lexeme for a comma', function() {
+        assert.equal(tokens[4].lexeme, ",");
+      });
+
+      it('should generate the correct token code for a comma', function() {
+        assert.equal(tokens[4].code, Token.COMMA);
+      });
+    });
+
+    describe('newline', function() {
+      var tokens = lexer.tokenize("function add(a,b)\na+b\nend");
+      it('should generate the correct lexeme for a newline', function() {
+        assert.equal(tokens[7].lexeme, '\n');
+      });
+
+      it('should generate the correct token code for a newline', function() {
+        assert.equal(tokens[7].code, Token.NEWLINE);
+      });
+    });
+
+    describe('function', function() {
+      var tokens = lexer.tokenize("function add(a,b)\na+b\nend");
+      it('should generate the correct lexeme for the function keyword', function() {
+        assert.equal(tokens[0].lexeme, 'function');
+      });
+
+      it('should generate the correct token code for the function keyword', function() {
+        assert.equal(tokens[0].code, Token.FUNCTION_KEYWORD);
+      });
+    });
+
+    describe('end', function() {
+      var tokens = lexer.tokenize("function add(a,b)\na+b\nend");
+      it('should generate the correct lexeme for the end keyword', function() {
+        assert.equal(tokens[12].lexeme, 'end');
+      });
+
+      it('should generate the correct token code for the end keyword', function() {
+        assert.equal(tokens[12].code, Token.END_KEYWORD);
+      });
+    });
   });
 
   describe('isValidIdentifierChar', function() {
@@ -133,6 +199,10 @@ describe('lexer', function() {
     it('should return true if the char is an underscore', function() {
       assert.equal(lexer.isValidIdentifierChar('_'), true);
     });
+
+    it('should return false if the char is undefined', function() {
+      assert.equal(lexer.isValidIdentifierChar(undefined), false);
+    });
   });
 
   describe('isNum', function() {
@@ -143,6 +213,10 @@ describe('lexer', function() {
     it('should return false if the char is not a number', function() {
       assert.equal(lexer.isNum("a"), false);
     });
+
+    it('should return false if the char is undefined', function() {
+      assert.equal(lexer.isNum(undefined), false);
+    });
   });
 
   describe('isEqualsSign', function() {
@@ -152,6 +226,26 @@ describe('lexer', function() {
 
     it('should return false if the char is not an equals sign', function() {
       assert.equal(lexer.isEqualsSign("?"), false);
+    });
+  });
+
+  describe('isWhitespace', function() {
+    it('should return true if the char is whitespace', function() {
+      assert.equal(lexer.isWhitespace(" "), true);
+    });
+
+    it('should return false if the char is not whitespace', function() {
+      assert.equal(lexer.isWhitespace("a"), false);
+    });
+  });
+
+  describe('isReservedWord', function() {
+    it('should return true if the string is a reserved word', function() {
+      assert.equal(lexer.isReservedWord("function"), true);
+    });
+
+    it('should return false if the string is not a reserved word', function() {
+      assert.equal(lexer.isReservedWord("blargh"), false);
     });
   });
 });

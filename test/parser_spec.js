@@ -26,9 +26,15 @@ describe('parser', function() {
       assert.equal(result.body.expressions[0].operator, Token.COMPARISON_OP);
     });
 
+    it('should parse a function definition', function() {
+      var result = parser.parse(lexer.tokenize("function add(a,b)\na+b\nend"));
+      assert.equal(result[0].body.expressions[0].operator, Token.ADD_OP);
+    });
+
     it('should fail gracefully when a binary operator does not have two arguments', function() {
-      parser.parse(lexer.tokenize("12 +"), false);
-      assert.include(Logger.Errors(), "unknown token; expected expression")
+      var result = parser.parse(lexer.tokenize("12 +"), false);
+      console.log(result);
+      assert.include(Logger.Errors(), "ParseError: expected expression")
     });
   });
 });

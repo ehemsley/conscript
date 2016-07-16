@@ -8,7 +8,16 @@ const CHAR_TO_TOKEN = new Map([
   ['*', Token.MULT_OP],
   ['/', Token.DIV_OP],
   ['(', Token.LEFT_PAREN],
-  [')', Token.RIGHT_PAREN]
+  [')', Token.RIGHT_PAREN],
+  ['[', Token.LEFT_BRACKET],
+  [']', Token.RIGHT_BRACKET],
+  [',', Token.COMMA],
+  ['\n', Token.NEWLINE]
+]);
+
+const RESERVED_WORD_TO_TOKEN = new Map([
+  ["function", Token.FUNCTION_KEYWORD ],
+  ["end", Token.END_KEYWORD ]
 ]);
 
 module.exports = {
@@ -20,37 +29,14 @@ module.exports = {
     var currentChar = chars[index];
 
     return (function (_this) {
+      const MULTICHAR_TO_FUNCTION = new Map([
+        ['=', buildEqualsToken]
+      ]);
+
       function nextChar() {
         index += 1;
         currentChar = chars[index];
         return currentChar;
-      }
-
-      function processToken() {
-        var result = CHAR_TO_TOKEN.get(currentChar);
-        if (result === undefined) {
-          if (_this.isValidIdentifierChar(currentChar)) {
-            buildAlphaNumericToken(_this.isValidIdentifierChar, Token.ID);
-          } else if (_this.isNum(currentChar)) {
-            buildAlphaNumericToken(_this.isNum, Token.NUM);
-          } else if (_this.isEqualsSign(currentChar)) {
-            buildEqualsToken();
-          } else {
-            Logger.LogError("LexerError: Unknown character");
-            nextChar();
-          }
-        } else {
-          tokens.push({ lexeme: currentChar, code: result });
-          nextChar();
-        }
-      }
-
-      function buildAlphaNumericToken(testFunction, tokenCode) {
-        var tokenString = currentChar;
-        while(testFunction(nextChar())) {
-          tokenString += currentChar;
-        }
-        tokens.push({ lexeme: tokenString, code: tokenCode })
       }
 
       function buildEqualsToken() {
@@ -59,6 +45,43 @@ module.exports = {
           nextChar();
         } else {
           tokens.push({ lexeme: "=", code: Token.ASSIGN_OP });
+        }
+      }
+
+      function processToken() {
+        var result = CHAR_TO_TOKEN.get(currentChar);
+        if (result === undefined) {
+          var buildFunction;
+          if (_this.isValidIdentifierChar(currentChar)) {
+            buildMultiCharToken(_this.isValidIdentifierChar, Token.ID);
+          } else if (_this.isNum(currentChar)) {
+            buildMultiCharToken(_this.isNum, Token.NUM);
+          } else if ((buildFunction = MULTICHAR_TO_FUNCTION.get(currentChar)) !== undefined) {
+            buildFunction();
+          } else if (_this.isWhitespace(currentChar)) {
+            nextChar();
+          } else {
+            Logger.LogError("LexerError: Unknown character " + currentChar);
+            nextChar();
+          }
+        } else {
+          tokens.push({ lexeme: currentChar, code: result });
+          nextChar();
+        }
+      }
+
+      function buildMultiCharToken(testFunction, tokenCode) {
+        var tokenString = currentChar;
+
+        while(testFunction(nextChar())) {
+          if (currentChar === undefined) { break; }
+          tokenString += currentChar;
+        }
+
+        if (_this.isReservedWord(tokenString)) {
+          tokens.push({ lexeme: tokenString, code: RESERVED_WORD_TO_TOKEN.get(tokenString) })
+        } else {
+          tokens.push({ lexeme: tokenString, code: tokenCode });
         }
       }
 
@@ -75,7 +98,7 @@ module.exports = {
   },
 
   isValidIdentifierChar: function(char) {
-    return /[a-zA-z_]/.test(char);
+    return !!char && /[a-zA-z_]/.test(char);
   },
 
   isNum: function(char) {
@@ -84,5 +107,13 @@ module.exports = {
 
   isEqualsSign: function(char) {
     return char === "=";
+  },
+
+  isWhitespace: function(char) {
+    return char === " ";
+  },
+
+  isReservedWord: function(string) {
+    return RESERVED_WORD_TO_TOKEN.get(string) !== undefined;
   }
 }

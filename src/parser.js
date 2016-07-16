@@ -88,7 +88,6 @@ module.exports = {
       } else if (currentToken.code == Token.LEFT_PAREN) {
         return parseParenExpression();
       } else {
-        Logger.LogError("unknown token; expected expression");
         return null;
       }
     }
@@ -97,6 +96,21 @@ module.exports = {
       var precedence_value = PRECEDENCE.get(currentToken.code);
       if (precedence_value == undefined) return -1;
       return precedence_value;
+    }
+
+    function parseExpressionSequence() {
+      var expressions = [];
+      var e;
+
+      while (true) { // :(
+        if (e = parseExpression()) {
+          expressions.push(e);
+          nextToken();
+          consumeNewlineTokens();
+        } else {
+          return new ast.ExpressionSequenceNode(expressions);
+        }
+      }
     }
 
     function parseExpression() {
@@ -116,11 +130,13 @@ module.exports = {
         nextToken();
 
         var right = parsePrimary();
-        if (!right) { return null; }
+        if (!right) {
+          return null;
+        }
 
         var nextPrecedence = tokenPrecedence();
         if (precedence < nextPrecedence) {
-          var right = parseBinaryOperationRightSide(tokenPrecedence + 1, right);
+          right = parseBinaryOperationRightSide(precedence + 1, right);
           if (!right) { return null; }
         }
 
@@ -143,8 +159,15 @@ module.exports = {
       }
 
       var argumentNames = [];
-      while (nextToken().code === Token.ID) {
-        argumentNames.push(currentToken.lexeme);
+      var parsingArgs = true;
+
+      while (parsingArgs) {
+        if (nextToken().code === Token.ID) {
+          argumentNames.push(new ast.VariableExpressionNode(currentToken.lexeme));
+          if (nextToken().code !== Token.COMMA) {
+            parsingArgs = false;
+          }
+        }
       }
 
       if (currentToken.code !== Token.RIGHT_PAREN) {
@@ -154,6 +177,8 @@ module.exports = {
 
       nextToken();
 
+      consumeNewlineTokens();
+
       return new ast.PrototypeNode(functionName, argumentNames);
     }
 
@@ -161,9 +186,15 @@ module.exports = {
       nextToken();
       var prototype = parsePrototype();
       if (!prototype) { return null; }
-      var e;
-      if (e = parseExpression) {
-        return new ast.FunctionNode(prototype, E);
+      var s;
+      if (s = parseExpressionSequence()) {
+        consumeNewlineTokens();
+        if (currentToken.code !== Token.END_KEYWORD) {
+          Logger.LogError("expected keyword end in function definition");
+          return null;
+        }
+        nextToken();
+        return new ast.FunctionNode(prototype, s);
       }
       return null;
     }
@@ -178,8 +209,10 @@ module.exports = {
     }
 
     function handleDefinition() {
-      var result = parseDefinition();
-      if (result !== null) {
+      var result;
+      if (result = parseDefinition()) {
+        return result;
+      } else {
         nextToken();
       }
     }
@@ -201,9 +234,17 @@ module.exports = {
           return null;
         } else if (currentToken.code === Token.EOF) {
           return expressions;
+        } else if (currentToken.code === Token.FUNCTION_KEYWORD) {
+          expressions.push(handleDefinition());
         } else {
           expressions.push(handleTopLevelExpression());
         }
+      }
+    }
+
+    function consumeNewlineTokens() {
+      while (currentToken.code === Token.NEWLINE) {
+        nextToken();
       }
     }
 

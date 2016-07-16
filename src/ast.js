@@ -33,6 +33,7 @@ module.exports = {
     this.codegen = Codegen.generateExpressionSequenceCode;
   },
 
+  //sort of want to rename this as it's not really a "prototype"
   PrototypeNode: function(name, args) {
     this.name = name;
     this.args = args;

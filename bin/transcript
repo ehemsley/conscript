@@ -12,6 +12,7 @@ program
     // this should probably become a buffer at some point
     var contents = fs.readFileSync(file).toString();
     var compiledCode = transcript.compile(contents);
-    console.log(compiledCode);
+    var newFilePath = file.substr(0, file.lastIndexOf(".")) + ".js";
+    fs.writeFileSync(newFilePath, compiledCode);
   })
   .parse(process.argv);

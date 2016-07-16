@@ -7,6 +7,6 @@ module.exports = {
     var tokens = Lexer.tokenize(string);
     var ast = Parser.parse(tokens);
     var code = Codegen.generate(ast);
-    return code;
+    return code + "\n";
   }
 }

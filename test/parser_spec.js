@@ -36,5 +36,37 @@ describe('parser', function() {
       var result = parser.parse(lexer.tokenize("function add(a,b)\na+b\nend"));
       assert.equal(result[0].body.expressions[0].operator, Token.ADD_OP);
     });
+
+    it('should parse an empty array definition', function() {
+      var result = parser.parse(lexer.tokenize("myArray = []"));
+      assert.deepEqual(result[0].body.expressions[0].right.contents, []);
+    });
+
+    it('should parse an array definition with one number', function() {
+      var result = parser.parse(lexer.tokenize("myArray = [4]"));
+      assert.equal(result[0].body.expressions[0].right.contents[0].value, 4);
+    });
+
+    it('should parse an array definition with multiple numbers', function() {
+      var result = parser.parse(lexer.tokenize("myArray = [2,3,4]"));
+      assert.equal(result[0].body.expressions[0].right.contents[0].value, 2);
+      assert.equal(result[0].body.expressions[0].right.contents[1].value, 3);
+      assert.equal(result[0].body.expressions[0].right.contents[2].value, 4);
+    });
+
+    it('should parse array of variables', function() {
+      var result = parser.parse(lexer.tokenize("myArray = [a,b,c]"));
+      assert.equal(result[0].body.expressions[0].right.contents[0].name, 'a');
+      assert.equal(result[0].body.expressions[0].right.contents[1].name, 'b');
+      assert.equal(result[0].body.expressions[0].right.contents[2].name, 'c');
+    });
+
+    it('should parse array of anonymous functions', function() {
+      var result = parser.parse(lexer.tokenize("myFunctionArray = [function(a) a*2 end, function(b) b * 5 end]"));
+      assert.equal(result[0].body.expressions[0].right.contents[0].body.expressions[0].right.value, 2);
+      assert.equal(result[0].body.expressions[0].right.contents[0].body.expressions[0].left.name, 'a');
+      assert.equal(result[0].body.expressions[0].right.contents[1].body.expressions[0].right.value, 5);
+      assert.equal(result[0].body.expressions[0].right.contents[1].body.expressions[0].left.name, 'b');
+    });
   });
 });

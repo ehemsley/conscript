@@ -59,28 +59,28 @@ describe('ast', function() {
     });
   });
 
-  describe('PrototypeNode', function() {
+  describe('FunctionSignatureNode', function() {
     var arg1 = new ast.NumberExpressionNode(12);
     var arg2 = new ast.NumberExpressionNode(45);
-    var prototypeNode = new ast.PrototypeNode("name", [arg1, arg2]);
+    var functionSignatureNode = new ast.FunctionSignatureNode("name", [arg1, arg2]);
 
     it('should set the name', function() {
-      assert.equal(prototypeNode.name, "name");
+      assert.equal(functionSignatureNode.name, "name");
     });
 
     it('should set the arguments', function() {
-      assert.include(prototypeNode.args, arg1);
-      assert.include(prototypeNode.args, arg2);
+      assert.include(functionSignatureNode.args, arg1);
+      assert.include(functionSignatureNode.args, arg2);
     });
   });
 
   describe('FunctionNode', function() {
-    var prototypeNode = new  ast.PrototypeNode("name", []);
+    var functionSignatureNode = new  ast.FunctionSignatureNode("name", []);
     var body = new ast.NumberExpressionNode(5);
-    var functionNode = new ast.FunctionNode(prototypeNode, body);
+    var functionNode = new ast.FunctionNode(functionSignatureNode, body);
 
     it('should set the prototype reference', function() {
-      assert.equal(functionNode.prototype, prototypeNode);
+      assert.equal(functionNode.signature, functionSignatureNode);
     });
 
     it('should set the body reference', function() {

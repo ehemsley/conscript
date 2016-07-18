@@ -8,7 +8,7 @@ const codegen = require('../src/codegen.js');
 describe('codegen', function() {
   describe('generate', function() {
     it('should wrap naked expressions in a self-invoking function', function(){
-      assert.equal(codegen.generate(parser.parse(lexer.tokenize("12 + 1234"))), "(function() {\nreturn 12 + 1234;\n})();");
+      assert.equal(codegen.generate(parser.parse(lexer.tokenize("12 + 1234"))), "(function() {\n  return 12 + 1234;\n})();");
     });
   });
 
@@ -57,22 +57,22 @@ describe('codegen', function() {
 
   describe('generateCallExpressionCode', function() {
     it('should generate proper code for a function call with no arguments', function() {
-      var prototypeNode = new ast.PrototypeNode("destroy", []);
-      var functionNode = new ast.FunctionNode(prototypeNode, []);
+      var signatureNode = new ast.FunctionSignatureNode("destroy", []);
+      var functionNode = new ast.FunctionNode(signatureNode, []);
       var callExpressionNode = new ast.CallExpressionNode(functionNode, []);
       assert.equal(callExpressionNode.codegen(), 'destroy();');
     });
 
     it('should generate proper code for a function call with one argument', function() {
-      var prototypeNode = new ast.PrototypeNode("square", [new ast.VariableExpressionNode('value')]);
-      var functionNode = new ast.FunctionNode(prototypeNode, []);
+      var signatureNode = new ast.FunctionSignatureNode("square", [new ast.VariableExpressionNode('value')]);
+      var functionNode = new ast.FunctionNode(signatureNode, []);
       var callExpressionNode = new ast.CallExpressionNode(functionNode, [new ast.NumberExpressionNode(3)]);
       assert.equal(callExpressionNode.codegen(), 'square(3);');
     });
 
     it('should generate proper code for a function call with two arguments', function() {
-      var prototypeNode = new ast.PrototypeNode("pow", [new ast.VariableExpressionNode('base'), new ast.VariableExpressionNode('exp')]);
-      var functionNode = new ast.FunctionNode(prototypeNode, []);
+      var signatureNode = new ast.FunctionSignatureNode("pow", [new ast.VariableExpressionNode('base'), new ast.VariableExpressionNode('exp')]);
+      var functionNode = new ast.FunctionNode(signatureNode, []);
       var callExpressionNode = new ast.CallExpressionNode(functionNode, [new ast.NumberExpressionNode(3), new ast.NumberExpressionNode(2)]);
       assert.equal(callExpressionNode.codegen(), 'pow(3, 2);');
     });
@@ -96,44 +96,44 @@ describe('codegen', function() {
 
   describe('generatePrototypeCode', function() {
     it('should generate proper function prototype with no arguments', function() {
-      var prototypeNode = new ast.PrototypeNode("myFun", []);
-      assert.equal(prototypeNode.codegen(), 'function myFun();');
+      var signatureNode = new ast.FunctionSignatureNode("myFun", []);
+      assert.equal(signatureNode.codegen(), 'function myFun();');
     });
 
     it('should generate proper function prototype with one argument', function() {
-      var prototypeNode = new ast.PrototypeNode("myFun", [new ast.VariableExpressionNode("myArg")]);
-      assert.equal(prototypeNode.codegen(), 'function myFun(myArg);');
+      var signatureNode = new ast.FunctionSignatureNode("myFun", [new ast.VariableExpressionNode("myArg")]);
+      assert.equal(signatureNode.codegen(), 'function myFun(myArg);');
     });
 
     it('should generate proper function prototype with two arguments', function() {
-      var prototypeNode = new ast.PrototypeNode("myFun", [new ast.VariableExpressionNode("firstArg"), new ast.VariableExpressionNode("secondArg")]);
-      assert.equal(prototypeNode.codegen(), 'function myFun(firstArg, secondArg);');
+      var signatureNode = new ast.FunctionSignatureNode("myFun", [new ast.VariableExpressionNode("firstArg"), new ast.VariableExpressionNode("secondArg")]);
+      assert.equal(signatureNode.codegen(), 'function myFun(firstArg, secondArg);');
     });
   });
 
   describe('functionNode', function() {
     it('should generate proper function code with empty body', function() {
-      var prototypeNode = new ast.PrototypeNode("myFun", []);
+      var signatureNode = new ast.FunctionSignatureNode("myFun", []);
       var emptyBody = new ast.ExpressionSequenceNode([]);
-      var functionNode = new ast.FunctionNode(prototypeNode, emptyBody);
+      var functionNode = new ast.FunctionNode(signatureNode, emptyBody);
       assert.equal(functionNode.codegen(), 'function myFun() {\n}');
     });
 
     it ('should generate proper function code with expression sequence body', function() {
-      var prototypeNode = new ast.PrototypeNode("myFun", []);
+      var signatureNode = new ast.FunctionSignatureNode("myFun", []);
       var firstExpression = new ast.BinaryExpressionNode(Token.ASSIGN_OP, new ast.VariableExpressionNode("myVar"), new ast.NumberExpressionNode(3));
       var secondExpression = new ast.BinaryExpressionNode(Token.ADD_OP, new ast.VariableExpressionNode("myVar"), new ast.NumberExpressionNode(4));
       var expressionSequenceNode = new ast.ExpressionSequenceNode([firstExpression, secondExpression]);
-      var functionNode = new ast.FunctionNode(prototypeNode, expressionSequenceNode);
+      var functionNode = new ast.FunctionNode(signatureNode, expressionSequenceNode);
       assert.equal(functionNode.codegen(), "function myFun() {\n  myVar = 3;\n  return myVar + 4;\n}");
     });
 
     it('should generate proper function code with expression sequence and arguments', function() {
-      var prototypeNode = new ast.PrototypeNode("myFun", [new ast.VariableExpressionNode("myArg")]);
+      var signatureNode = new ast.FunctionSignatureNode("myFun", [new ast.VariableExpressionNode("myArg")]);
       var firstExpression = new ast.BinaryExpressionNode(Token.ASSIGN_OP, new ast.VariableExpressionNode("myVar"), new ast.NumberExpressionNode(3));
       var secondExpression = new ast.BinaryExpressionNode(Token.ADD_OP, new ast.VariableExpressionNode("myVar"), new ast.NumberExpressionNode(4));
       var expressionSequenceNode = new ast.ExpressionSequenceNode([firstExpression, secondExpression]);
-      var functionNode = new ast.FunctionNode(prototypeNode, expressionSequenceNode);
+      var functionNode = new ast.FunctionNode(signatureNode, expressionSequenceNode);
       assert.equal(functionNode.codegen(), "function myFun(myArg) {\n  myVar = 3;\n  return myVar + 4;\n}");
     });
   });
@@ -150,7 +150,29 @@ describe('codegen', function() {
       var secondExpression = new ast.BinaryExpressionNode(Token.ADD_OP, new ast.VariableExpressionNode("myVar"), new ast.VariableExpressionNode("givenVar"));
       var expressionSequenceNode = new ast.ExpressionSequenceNode([firstExpression, secondExpression]);
       var selfInvokingFunctionNode = new ast.SelfInvokingFunctionNode(expressionSequenceNode, [new ast.VariableExpressionNode("givenVar")], [new ast.NumberExpressionNode(2)]);
-      assert.equal(selfInvokingFunctionNode.codegen(), '(function(givenVar) {\nmyVar = 3;\nreturn myVar + givenVar;\n})(2);');
+      assert.equal(selfInvokingFunctionNode.codegen(), '(function(givenVar) {\n  myVar = 3;\n  return myVar + givenVar;\n})(2);');
+    });
+  });
+
+  describe('ArrayNode', function() {
+    it('should generate correct code for empty array', function() {
+      var emptyArrayNode = new ast.ArrayNode([]);
+      assert.equal(emptyArrayNode.codegen(), '[]');
+    });
+
+    it('should generate correct code for array with one number', function() {
+      var arrayNode = new ast.ArrayNode([new ast.NumberExpressionNode(3)]);
+      assert.equal(arrayNode.codegen(), '[3]');
+    });
+
+    it('should generate correct code for array with multiple numbers', function() {
+      var arrayNode = new ast.ArrayNode([new ast.NumberExpressionNode(2), new ast.NumberExpressionNode(3), new ast.NumberExpressionNode(4)]);
+      assert.equal(arrayNode.codegen(), '[2, 3, 4]');
+    });
+
+    it('should generate correct code for array with multiple variables', function() {
+      var arrayNode = new ast.ArrayNode([new ast.VariableExpressionNode('a'), new ast.VariableExpressionNode('b')]);
+      assert.equal(arrayNode.codegen(), '[a, b]');
     });
   });
 });

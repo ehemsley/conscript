@@ -98,7 +98,7 @@ module.exports = {
   },
 
   isValidIdentifierChar: function(char) {
-    return !!char && /[a-zA-z_]/.test(char);
+    return !!char && /[a-zA-Z_]/.test(char);
   },
 
   isNum: function(char) {

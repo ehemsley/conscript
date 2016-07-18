@@ -66,13 +66,13 @@ module.exports = {
   },
 
   generateCallExpressionCode: function() {
-    var code = this.callee.prototype.name + "(";
+    var code = this.callee.signature.name + "(";
     code += generateArgumentCode(this.args);
     code += ");";
     return code;
   },
 
-  generatePrototypeCode: function() {
+  generateSignatureCode: function() {
     var code = "function " + this.name + "(";
     code += generateArgumentCode(this.args);
     code += ");"
@@ -80,7 +80,7 @@ module.exports = {
   },
 
   generateFunctionCode: function() {
-    var prototypeCode = this.prototype.codegen();
+    var prototypeCode = this.signature.codegen();
     tabLevel += 1;
     var bodyCode = this.body.codegen();
     tabLevel -= 1;
@@ -89,12 +89,26 @@ module.exports = {
 
   generateSelfInvokingFunctionCode: function() {
     var code = "(function(";
-    code += generateArgumentCode(this.prototypeArgs);
+    code += generateArgumentCode(this.signatureArgs);
     code += ") {\n";
+    tabLevel += 1;
     code += this.body.codegen();
+    tabLevel -= 1;
     code += "})("
     code += generateArgumentCode(this.callArgs);
     code += ");"
+    return code;
+  },
+
+  generateArrayCode: function() {
+    var code = "[";
+    for (var i = 0; i < this.contents.length; i++) {
+      code += this.contents[i].codegen()
+      if (i !== this.contents.length - 1) {
+        code += ", ";
+      }
+    }
+    code += "]";
     return code;
   }
 }

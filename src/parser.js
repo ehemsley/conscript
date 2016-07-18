@@ -80,6 +80,33 @@ module.exports = {
       return new ast.CallExpressionNode(identifier_name, arguments);
     }
 
+    function parseBracketExpression() {
+      var contents = [];
+
+      nextToken();
+      var e;
+      if (e = parseExpression()) {
+        contents.push(e);
+      } else if (currentToken.code === Token.RIGHT_BRACKET) {
+        nextToken();
+        return new ast.ArrayNode(contents);
+      }
+
+      while (true) {
+        if (currentToken.code === Token.COMMA) {
+          nextToken();
+        } else if (currentToken.code === Token.RIGHT_BRACKET) {
+          nextToken();
+          return new ast.ArrayNode(contents);
+        } else if (e = parseExpression()) {
+          contents.push(e);
+        } else {
+          Logger.LogError("Error: expected expression in array definition");
+          return null;
+        }
+      }
+    }
+
     function parsePrimary() {
       if (currentToken.code == Token.ID) {
         return parseIdentifierExpression();
@@ -87,7 +114,11 @@ module.exports = {
         return parseNumberExpression();
       } else if (currentToken.code == Token.LEFT_PAREN) {
         return parseParenExpression();
-      } else {
+      } else if (currentToken.code === Token.LEFT_BRACKET) {
+        return parseBracketExpression();
+      } else if (currentToken.code === Token.FUNCTION_KEYWORD) {
+        return parseDefinition();
+      }else {
         return null;
       }
     }
@@ -105,7 +136,6 @@ module.exports = {
       while (true) { // :(
         if (e = parseExpression()) {
           expressions.push(e);
-          nextToken();
           consumeNewlineTokens();
         } else {
           return new ast.ExpressionSequenceNode(expressions);
@@ -144,14 +174,14 @@ module.exports = {
       }
     }
 
-    function parsePrototype() {
+    function parseFunctionSignature() {
+      var functionName;
       if (currentToken.code !== Token.ID) {
-        Logger.LogError("expected function name in prototype");
-        return null;
+        functionName = '';
+      } else {
+        functionName = currentToken.lexeme;
+        nextToken();
       }
-
-      var functionName = currentToken.lexeme;
-      nextToken();
 
       if (currentToken.code !== Token.LEFT_PAREN) {
         Logger.LogError("expected '(' in prototype");
@@ -179,13 +209,13 @@ module.exports = {
 
       consumeNewlineTokens();
 
-      return new ast.PrototypeNode(functionName, argumentNames);
+      return new ast.FunctionSignatureNode(functionName, argumentNames);
     }
 
     function parseDefinition() {
       nextToken();
-      var prototype = parsePrototype();
-      if (!prototype) { return null; }
+      var signature = parseFunctionSignature();
+      if (!signature) { return null; }
       var s;
       if (s = parseExpressionSequence()) {
         consumeNewlineTokens();
@@ -194,7 +224,7 @@ module.exports = {
           return null;
         }
         nextToken();
-        return new ast.FunctionNode(prototype, s);
+        return new ast.FunctionNode(signature, s);
       }
       return null;
     }

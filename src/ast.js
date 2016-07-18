@@ -34,22 +34,27 @@ module.exports = {
   },
 
   //sort of want to rename this as it's not really a "prototype"
-  PrototypeNode: function(name, args) {
+  FunctionSignatureNode: function(name, args) {
     this.name = name;
     this.args = args;
-    this.codegen = Codegen.generatePrototypeCode;
+    this.codegen = Codegen.generateSignatureCode;
   },
 
-  FunctionNode: function(prototype, body) {
-    this.prototype = prototype;
+  FunctionNode: function(signature, body) {
+    this.signature = signature;
     this.body = body;
     this.codegen = Codegen.generateFunctionCode;
   },
 
-  SelfInvokingFunctionNode: function(body, prototypeArgs, callArgs) {
+  SelfInvokingFunctionNode: function(body, signatureArgs, callArgs) {
     this.body = body;
-    this.prototypeArgs = typeof prototypeArgs !== 'undefined' ?  prototypeArgs : [];
+    this.signatureArgs = typeof signatureArgs !== 'undefined' ?  signatureArgs : [];
     this.callArgs = typeof callArgs !== 'undefined' ? callArgs : [];
     this.codegen = Codegen.generateSelfInvokingFunctionCode;
+  },
+
+  ArrayNode: function(contents) {
+    this.contents = contents;
+    this.codegen = Codegen.generateArrayCode;
   }
 }

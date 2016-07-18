@@ -203,6 +203,10 @@ describe('lexer', function() {
     it('should return false if the char is undefined', function() {
       assert.equal(lexer.isValidIdentifierChar(undefined), false);
     });
+
+    it('should return false if the char is a bracket', function() {
+      assert.equal(lexer.isValidIdentifierChar(']'), false);
+    });
   });
 
   describe('isNum', function() {

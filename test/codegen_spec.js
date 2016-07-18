@@ -175,4 +175,12 @@ describe('codegen', function() {
       assert.equal(arrayNode.codegen(), '[a, b]');
     });
   });
+
+  describe('ListGeneratorNode', function() {
+    it('should generate correct code for a number list generator', function() {
+      var listGeneratorNode = new ast.ListGeneratorNode(new ast.NumberExpressionNode(1), new ast.NumberExpressionNode(5));
+      assert.equal(listGeneratorNode.codegen(),
+        "(function(){\nvar list = [];\nfor (var i = 1; i <= 5; i++) {\nlist.push(i);\n}\nreturn list;}())");
+    });
+  });
 });

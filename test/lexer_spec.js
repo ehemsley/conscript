@@ -181,6 +181,28 @@ describe('lexer', function() {
         assert.equal(tokens[12].code, Token.END_KEYWORD);
       });
     });
+
+    describe('point', function() {
+      var tokens = lexer.tokenize("myArray.push");
+      it('should generate the correct lexeme for the point', function() {
+        assert.equal(tokens[1].lexeme, '.');
+      });
+
+      it('should generate the correct token code for the point', function() {
+        assert.equal(tokens[1].code, Token.POINT);
+      });
+    });
+
+    describe('through', function() {
+      var tokens = lexer.tokenize("(1..5)");
+      it('should generate the correct lexeme for the through op', function() {
+        assert.equal(tokens[2].lexeme, '..');
+      });
+
+      it('should generate the correct token code for the through op', function() {
+        assert.equal(tokens[2].code, Token.THROUGH_OP);
+      });
+    });
   });
 
   describe('isValidIdentifierChar', function() {
@@ -222,6 +244,12 @@ describe('lexer', function() {
       assert.equal(lexer.isNum(undefined), false);
     });
   });
+
+  describe('isNumOrDecimalPoint', function() {
+    it('should return true if the char is a decimal point', function() {
+      assert.equal(lexer.isNumOrDecimalPoint('.'), true);
+    });
+  })
 
   describe('isEqualsSign', function() {
     it('should return true if the char is an equals sign', function() {

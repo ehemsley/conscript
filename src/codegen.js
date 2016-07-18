@@ -110,5 +110,14 @@ module.exports = {
     }
     code += "]";
     return code;
+  },
+
+  generateListGeneratorCode: function() {
+    var code = "(function(){\n";
+    code += "var list = [];\n"
+    code += "for (var i = " + this.left.codegen() + "; i <= " + this.right.codegen() + "; i++) {\n";
+    code += "list.push(i);\n";
+    code += "}\nreturn list;}())";
+    return code;
   }
 }

@@ -15,6 +15,16 @@ const CHAR_TO_TOKEN = new Map([
   ['\n', Token.NEWLINE]
 ]);
 
+const REPEATABLE_SINGLE_CHAR_TO_TOKEN = new Map([
+  ['=', Token.ASSIGN_OP],
+  ['.', Token.POINT]
+])
+
+const REPEATABLE_MULTI_CHAR_TO_TOKEN = new Map([
+  ["==", Token.COMPARISON_OP],
+  ["..", Token.THROUGH_OP]
+])
+
 const RESERVED_WORD_TO_TOKEN = new Map([
   ["function", Token.FUNCTION_KEYWORD ],
   ["end", Token.END_KEYWORD ]
@@ -29,35 +39,21 @@ module.exports = {
     var currentChar = chars[index];
 
     return (function (_this) {
-      const MULTICHAR_TO_FUNCTION = new Map([
-        ['=', buildEqualsToken]
-      ]);
-
       function nextChar() {
         index += 1;
         currentChar = chars[index];
         return currentChar;
       }
 
-      function buildEqualsToken() {
-        if (nextChar() === "=") {
-          tokens.push({ lexeme: "==", code: Token.COMPARISON_OP });
-          nextChar();
-        } else {
-          tokens.push({ lexeme: "=", code: Token.ASSIGN_OP });
-        }
-      }
-
       function processToken() {
         var result = CHAR_TO_TOKEN.get(currentChar);
         if (result === undefined) {
-          var buildFunction;
           if (_this.isValidIdentifierChar(currentChar)) {
-            buildMultiCharToken(_this.isValidIdentifierChar, Token.ID);
+            buildAlphaNumericToken(_this.isValidIdentifierChar, Token.ID);
           } else if (_this.isNum(currentChar)) {
-            buildMultiCharToken(_this.isNum, Token.NUM);
-          } else if ((buildFunction = MULTICHAR_TO_FUNCTION.get(currentChar)) !== undefined) {
-            buildFunction();
+            buildAlphaNumericToken(_this.isNum, Token.NUM);
+          } else if (REPEATABLE_SINGLE_CHAR_TO_TOKEN.get(currentChar) !== undefined) {
+            buildRepeatableCharToken();
           } else if (_this.isWhitespace(currentChar)) {
             nextChar();
           } else {
@@ -70,7 +66,7 @@ module.exports = {
         }
       }
 
-      function buildMultiCharToken(testFunction, tokenCode) {
+      function buildAlphaNumericToken(testFunction, tokenCode) {
         var tokenString = currentChar;
 
         while(testFunction(nextChar())) {
@@ -82,6 +78,17 @@ module.exports = {
           tokens.push({ lexeme: tokenString, code: RESERVED_WORD_TO_TOKEN.get(tokenString) })
         } else {
           tokens.push({ lexeme: tokenString, code: tokenCode });
+        }
+      }
+
+      function buildRepeatableCharToken() {
+        var char = currentChar;
+        if (nextChar() === char) {
+          var token = char + char;
+          tokens.push({ lexeme: token, code: REPEATABLE_MULTI_CHAR_TO_TOKEN.get(token) });
+          nextChar();
+        } else {
+          tokens.push({ lexeme: char, code: REPEATABLE_SINGLE_CHAR_TO_TOKEN.get(char) });
         }
       }
 
@@ -103,6 +110,10 @@ module.exports = {
 
   isNum: function(char) {
     return /[0-9]/.test(char);
+  },
+
+  isNumOrDecimalPoint: function(char) {
+    return /[0-9\.]/.test(char);
   },
 
   isEqualsSign: function(char) {

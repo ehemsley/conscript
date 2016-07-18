@@ -12,7 +12,8 @@ const PRECEDENCE = new Map([
   [Token.MULT_OP, 40],
   [Token.DIV_OP, 40],
   [Token.COMPARISON_OP, 10],
-  [Token.ASSIGN_OP, 1]
+  [Token.ASSIGN_OP, 1],
+  [Token.THROUGH_OP, 60]
 ]);
 
 module.exports = {
@@ -29,9 +30,20 @@ module.exports = {
     }
 
     function parseNumberExpression() {
-      var numberExpressionNode = new ast.NumberExpressionNode(currentToken.lexeme);
+      var number = currentToken.lexeme;
       nextToken();
-      return numberExpressionNode;
+      if (currentToken.code === Token.POINT) {
+        nextToken();
+        if (currentToken.code === Token.NUM) {
+          var decimalComponent = currentToken.lexeme;
+          nextToken();
+          return new ast.NumberExpressionNode(number + '.' + decimalComponent);
+        } else {
+          return new ast.NumberExpressionNode(number)
+        }
+      } else {
+        return new ast.NumberExpressionNode(number);
+      }
     }
 
     function parseParenExpression() {
@@ -170,7 +182,11 @@ module.exports = {
           if (!right) { return null; }
         }
 
-        left = new ast.BinaryExpressionNode(binaryOperation.code, left, right);
+        if (binaryOperation.code === Token.THROUGH_OP) {
+          left = new ast.ListGeneratorNode(left, right);
+        } else {
+          left = new ast.BinaryExpressionNode(binaryOperation.code, left, right);
+        }
       }
     }
 

@@ -30,7 +30,8 @@ module.exports = {
 
     return (function (_this) {
       const MULTICHAR_TO_FUNCTION = new Map([
-        ['=', buildEqualsToken]
+        ['=', buildEqualsToken],
+        ['.', buildPeriodToken]
       ]);
 
       function nextChar() {
@@ -45,6 +46,15 @@ module.exports = {
           nextChar();
         } else {
           tokens.push({ lexeme: "=", code: Token.ASSIGN_OP });
+        }
+      }
+
+      function buildPeriodToken() {
+        if (nextChar() === '.') {
+          tokens.push({ lexeme: "..", code: Token.THROUGH_OP });
+          nextChar();
+        } else {
+          tokens.push({ lexeme: ".", code: Token.POINT });
         }
       }
 
@@ -103,6 +113,10 @@ module.exports = {
 
   isNum: function(char) {
     return /[0-9]/.test(char);
+  },
+
+  isNumOrDecimalPoint: function(char) {
+    return /[0-9\.]/.test(char);
   },
 
   isEqualsSign: function(char) {

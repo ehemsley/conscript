@@ -56,5 +56,11 @@ module.exports = {
   ArrayNode: function(contents) {
     this.contents = contents;
     this.codegen = Codegen.generateArrayCode;
+  },
+
+  ListGeneratorNode: function(left, right) {
+    this.left = left;
+    this.right = right;
+    this.codegen = Codegen.generateListGeneratorCode;
   }
 }

@@ -174,9 +174,6 @@ module.exports = {
       }
     }
 
-    //rename this to parseFunctionSignature  and make it
-    //so it can be used
-    //with anonymous functions as well
     function parseFunctionSignature() {
       var functionName;
       if (currentToken.code !== Token.ID) {

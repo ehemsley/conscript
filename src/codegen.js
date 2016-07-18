@@ -9,8 +9,6 @@ const OPERATOR_TO_CODE = new Map([
   [Token.COMPARISON_OP, "==="]
 ]);
 
-var tabLevel = 0;
-
 function generateArgumentCode(args) {
   var code = "";
   for (var i = 0; i < args.length; i++) {
@@ -18,14 +16,6 @@ function generateArgumentCode(args) {
     if (i !== args.length - 1) { code += ", "; }
   }
   return code;
-}
-
-function generateTabSpaces() {
-  var spaces = ""
-  for (var i = 0; i < tabLevel; i++) {
-    spaces += "  ";
-  }
-  return spaces;
 }
 
 module.exports = {
@@ -57,10 +47,10 @@ module.exports = {
   generateExpressionSequenceCode: function() {
     var code = "";
     for (var i = 0; i < this.expressions.length - 1; i++) {
-      code += generateTabSpaces() + this.expressions[i].codegen() + ";\n";
+      code += this.expressions[i].codegen() + "; ";
     }
     if (this.expressions.length > 0) {
-      code += generateTabSpaces() + "return " + this.expressions[this.expressions.length - 1].codegen() + ";\n";
+      code += "return " + this.expressions[this.expressions.length - 1].codegen() + ";";
     }
     return code;
   },
@@ -81,19 +71,15 @@ module.exports = {
 
   generateFunctionCode: function() {
     var prototypeCode = this.signature.codegen();
-    tabLevel += 1;
     var bodyCode = this.body.codegen();
-    tabLevel -= 1;
-    return prototypeCode.slice(0, -1) + " {\n" + bodyCode + "}";
+    return prototypeCode.slice(0, -1) + " {" + bodyCode + "}";
   },
 
   generateSelfInvokingFunctionCode: function() {
     var code = "(function(";
     code += generateArgumentCode(this.signatureArgs);
-    code += ") {\n";
-    tabLevel += 1;
+    code += ") {";
     code += this.body.codegen();
-    tabLevel -= 1;
     code += "})("
     code += generateArgumentCode(this.callArgs);
     code += ");"
@@ -113,11 +99,11 @@ module.exports = {
   },
 
   generateListGeneratorCode: function() {
-    var code = "(function(){\n";
-    code += "var list = [];\n"
-    code += "for (var i = " + this.left.codegen() + "; i <= " + this.right.codegen() + "; i++) {\n";
-    code += "list.push(i);\n";
-    code += "}\nreturn list;}())";
+    var code = "(function() {";
+    code += "var list = []; "
+    code += "for (var i = " + this.left.codegen() + "; i <= " + this.right.codegen() + "; i++) {";
+    code += "list.push(i);";
+    code += "} return list;}())";
     return code;
   }
 }

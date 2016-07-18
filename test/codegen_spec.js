@@ -8,7 +8,7 @@ const codegen = require('../src/codegen.js');
 describe('codegen', function() {
   describe('generate', function() {
     it('should wrap naked expressions in a self-invoking function', function(){
-      assert.equal(codegen.generate(parser.parse(lexer.tokenize("12 + 1234"))), "(function() {\n  return 12 + 1234;\n})();");
+      assert.equal(codegen.generate(parser.parse(lexer.tokenize("12 + 1234"))), "(function() {return 12 + 1234;})();");
     });
   });
 
@@ -82,7 +82,7 @@ describe('codegen', function() {
     it('should generate proper code for a single expression', function() {
       var binaryExpressionNode = new ast.BinaryExpressionNode(Token.ADD_OP, new ast.NumberExpressionNode(10), new ast.NumberExpressionNode(4));
       var expressionSequenceNode = new ast.ExpressionSequenceNode([binaryExpressionNode]);
-      assert.equal(expressionSequenceNode.codegen(), 'return 10 + 4;\n');
+      assert.equal(expressionSequenceNode.codegen(), 'return 10 + 4;');
     });
 
     it('should generate proper code for multiple expressions', function() {
@@ -90,7 +90,7 @@ describe('codegen', function() {
       var addNode = new ast.BinaryExpressionNode(Token.ADD_OP, new ast.NumberExpressionNode(10), new ast.NumberExpressionNode(4));
       var subNode = new ast.BinaryExpressionNode(Token.SUB_OP, new ast.NumberExpressionNode(10), new ast.NumberExpressionNode(4));
       var expressionSequenceNode = new ast.ExpressionSequenceNode([multNode, addNode, subNode]);
-      assert.equal(expressionSequenceNode.codegen(), "10 * 4;\n10 + 4;\nreturn 10 - 4;\n");
+      assert.equal(expressionSequenceNode.codegen(), "10 * 4; 10 + 4; return 10 - 4;");
     });
   });
 
@@ -116,7 +116,7 @@ describe('codegen', function() {
       var signatureNode = new ast.FunctionSignatureNode("myFun", []);
       var emptyBody = new ast.ExpressionSequenceNode([]);
       var functionNode = new ast.FunctionNode(signatureNode, emptyBody);
-      assert.equal(functionNode.codegen(), 'function myFun() {\n}');
+      assert.equal(functionNode.codegen(), 'function myFun() {}');
     });
 
     it ('should generate proper function code with expression sequence body', function() {
@@ -125,7 +125,7 @@ describe('codegen', function() {
       var secondExpression = new ast.BinaryExpressionNode(Token.ADD_OP, new ast.VariableExpressionNode("myVar"), new ast.NumberExpressionNode(4));
       var expressionSequenceNode = new ast.ExpressionSequenceNode([firstExpression, secondExpression]);
       var functionNode = new ast.FunctionNode(signatureNode, expressionSequenceNode);
-      assert.equal(functionNode.codegen(), "function myFun() {\n  myVar = 3;\n  return myVar + 4;\n}");
+      assert.equal(functionNode.codegen(), "function myFun() {myVar = 3; return myVar + 4;}");
     });
 
     it('should generate proper function code with expression sequence and arguments', function() {
@@ -134,7 +134,7 @@ describe('codegen', function() {
       var secondExpression = new ast.BinaryExpressionNode(Token.ADD_OP, new ast.VariableExpressionNode("myVar"), new ast.NumberExpressionNode(4));
       var expressionSequenceNode = new ast.ExpressionSequenceNode([firstExpression, secondExpression]);
       var functionNode = new ast.FunctionNode(signatureNode, expressionSequenceNode);
-      assert.equal(functionNode.codegen(), "function myFun(myArg) {\n  myVar = 3;\n  return myVar + 4;\n}");
+      assert.equal(functionNode.codegen(), "function myFun(myArg) {myVar = 3; return myVar + 4;}");
     });
   });
 
@@ -142,7 +142,7 @@ describe('codegen', function() {
     it('should generate proper self invoking function code with empty body', function() {
       var emptyBody = new ast.ExpressionSequenceNode([]);
       var selfInvokingFunctionNode = new ast.SelfInvokingFunctionNode(emptyBody);
-      assert.equal(selfInvokingFunctionNode.codegen(), '(function() {\n})();');
+      assert.equal(selfInvokingFunctionNode.codegen(), '(function() {})();');
     });
 
     it('should generate proper self invoking function code with expression sequence and one argument', function() {
@@ -150,7 +150,7 @@ describe('codegen', function() {
       var secondExpression = new ast.BinaryExpressionNode(Token.ADD_OP, new ast.VariableExpressionNode("myVar"), new ast.VariableExpressionNode("givenVar"));
       var expressionSequenceNode = new ast.ExpressionSequenceNode([firstExpression, secondExpression]);
       var selfInvokingFunctionNode = new ast.SelfInvokingFunctionNode(expressionSequenceNode, [new ast.VariableExpressionNode("givenVar")], [new ast.NumberExpressionNode(2)]);
-      assert.equal(selfInvokingFunctionNode.codegen(), '(function(givenVar) {\n  myVar = 3;\n  return myVar + givenVar;\n})(2);');
+      assert.equal(selfInvokingFunctionNode.codegen(), '(function(givenVar) {myVar = 3; return myVar + givenVar;})(2);');
     });
   });
 
@@ -180,7 +180,7 @@ describe('codegen', function() {
     it('should generate correct code for a number list generator', function() {
       var listGeneratorNode = new ast.ListGeneratorNode(new ast.NumberExpressionNode(1), new ast.NumberExpressionNode(5));
       assert.equal(listGeneratorNode.codegen(),
-        "(function(){\nvar list = [];\nfor (var i = 1; i <= 5; i++) {\nlist.push(i);\n}\nreturn list;}())");
+        "(function() {var list = []; for (var i = 1; i <= 5; i++) {list.push(i);} return list;}())");
     });
   });
 });

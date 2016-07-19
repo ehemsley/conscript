@@ -8,7 +8,7 @@ const codegen = require('../src/codegen.js');
 describe('codegen', function() {
   describe('generate', function() {
     it('should wrap naked expressions in a self-invoking function', function(){
-      assert.equal(codegen.generate(parser.parse(lexer.tokenize("12 + 1234"))), "(function() {return 12 + 1234;})();");
+      assert.equal(codegen.generate(parser.parse(lexer.tokenize("12 + 1234"))), "(function() {12 + 1234;})();");
     });
   });
 
@@ -82,7 +82,7 @@ describe('codegen', function() {
     it('should generate proper code for a single expression', function() {
       var binaryExpressionNode = new ast.BinaryExpressionNode(Token.ADD_OP, new ast.NumberExpressionNode(10), new ast.NumberExpressionNode(4));
       var expressionSequenceNode = new ast.ExpressionSequenceNode([binaryExpressionNode]);
-      assert.equal(expressionSequenceNode.codegen(), 'return 10 + 4;');
+      assert.equal(expressionSequenceNode.codegen(), '10 + 4;');
     });
 
     it('should generate proper code for multiple expressions', function() {
@@ -90,7 +90,7 @@ describe('codegen', function() {
       var addNode = new ast.BinaryExpressionNode(Token.ADD_OP, new ast.NumberExpressionNode(10), new ast.NumberExpressionNode(4));
       var subNode = new ast.BinaryExpressionNode(Token.SUB_OP, new ast.NumberExpressionNode(10), new ast.NumberExpressionNode(4));
       var expressionSequenceNode = new ast.ExpressionSequenceNode([multNode, addNode, subNode]);
-      assert.equal(expressionSequenceNode.codegen(), "10 * 4; 10 + 4; return 10 - 4;");
+      assert.equal(expressionSequenceNode.codegen(), "10 * 4;10 + 4;10 - 4;");
     });
   });
 
@@ -125,7 +125,7 @@ describe('codegen', function() {
       var secondExpression = new ast.BinaryExpressionNode(Token.ADD_OP, new ast.VariableExpressionNode("myVar"), new ast.NumberExpressionNode(4));
       var expressionSequenceNode = new ast.ExpressionSequenceNode([firstExpression, secondExpression]);
       var functionNode = new ast.FunctionNode(signatureNode, expressionSequenceNode);
-      assert.equal(functionNode.codegen(), "function myFun() {myVar = 3; return myVar + 4;}");
+      assert.equal(functionNode.codegen(), "function myFun() {myVar = 3;myVar + 4;}");
     });
 
     it('should generate proper function code with expression sequence and arguments', function() {
@@ -134,7 +134,7 @@ describe('codegen', function() {
       var secondExpression = new ast.BinaryExpressionNode(Token.ADD_OP, new ast.VariableExpressionNode("myVar"), new ast.NumberExpressionNode(4));
       var expressionSequenceNode = new ast.ExpressionSequenceNode([firstExpression, secondExpression]);
       var functionNode = new ast.FunctionNode(signatureNode, expressionSequenceNode);
-      assert.equal(functionNode.codegen(), "function myFun(myArg) {myVar = 3; return myVar + 4;}");
+      assert.equal(functionNode.codegen(), "function myFun(myArg) {myVar = 3;myVar + 4;}");
     });
   });
 
@@ -150,7 +150,7 @@ describe('codegen', function() {
       var secondExpression = new ast.BinaryExpressionNode(Token.ADD_OP, new ast.VariableExpressionNode("myVar"), new ast.VariableExpressionNode("givenVar"));
       var expressionSequenceNode = new ast.ExpressionSequenceNode([firstExpression, secondExpression]);
       var selfInvokingFunctionNode = new ast.SelfInvokingFunctionNode(expressionSequenceNode, [new ast.VariableExpressionNode("givenVar")], [new ast.NumberExpressionNode(2)]);
-      assert.equal(selfInvokingFunctionNode.codegen(), '(function(givenVar) {myVar = 3; return myVar + givenVar;})(2);');
+      assert.equal(selfInvokingFunctionNode.codegen(), '(function(givenVar) {myVar = 3;myVar + givenVar;})(2);');
     });
   });
 
@@ -181,6 +181,38 @@ describe('codegen', function() {
       var listGeneratorNode = new ast.ListGeneratorNode(new ast.NumberExpressionNode(1), new ast.NumberExpressionNode(5));
       assert.equal(listGeneratorNode.codegen(),
         "(function() {var list = []; for (var i = 1; i <= 5; i++) {list.push(i);} return list;}())");
+    });
+  });
+
+  describe('ClosureNode', function() {
+    it('should generate correct code for a closure', function() {
+      var closure = new ast.ClosureNode(new ast.ExpressionSequenceNode([new ast.BinaryExpressionNode(Token.ASSIGN_OP, new ast.VariableExpressionNode('a'), new ast.VariableExpressionNode('elt'))]));
+      assert.equal(closure.codegen(), '(function() {a = elt;}());')
+    });
+  });
+
+  describe('ForLoopWithVariableNode', function() {
+    it('should generate correct code for a list iterator', function() {
+      var identifier = new ast.VariableExpressionNode('myArray');
+      var closure = new ast.ClosureNode(new ast.ExpressionSequenceNode([new ast.BinaryExpressionNode(Token.ASSIGN_OP, new ast.VariableExpressionNode('a'), new ast.VariableExpressionNode('elt'))]));
+      var forLoopNode = new ast.ForLoopWithVariableNode(new ast.VariableExpressionNode('elt'), identifier, closure);
+      assert.equal(forLoopNode.codegen(), 'for (var __i = 0; __i < myArray.length; __i++) {var elt = myArray[__i];(function() {a = elt;}());}');
+    });
+  });
+
+  describe('ForLoopWithListGeneratorNode', function() {
+    it('should generate correct code for a for loop with list generator', function() {
+      var listGenerator = new ast.ListGeneratorNode(new ast.NumberExpressionNode(1), new ast.NumberExpressionNode(5));
+      var closure = new ast.ClosureNode(new ast.ExpressionSequenceNode([new ast.BinaryExpressionNode(Token.ASSIGN_OP, new ast.VariableExpressionNode('a'), new ast.VariableExpressionNode('elt'))]));
+      var forLoopNode = new ast.ForLoopWithListGeneratorNode(new ast.VariableExpressionNode('elt'), listGenerator, closure);
+      assert.equal(forLoopNode.codegen(), 'for (var __i = 1; __i <= 5; __i++) {var elt = __i;(function() {a = elt;}());}')
+    });
+  });
+
+  describe('PrintStatementNode', function() {
+    it('should generate correct code for a simple print statement', function() {
+      var printStatement = new ast.PrintStatementNode(new ast.VariableExpressionNode('a'));
+      assert.equal(printStatement.codegen(), 'console.log(a)');
     });
   });
 });

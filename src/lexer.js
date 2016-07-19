@@ -26,8 +26,12 @@ const REPEATABLE_MULTI_CHAR_TO_TOKEN = new Map([
 ])
 
 const RESERVED_WORD_TO_TOKEN = new Map([
-  ["function", Token.FUNCTION_KEYWORD ],
-  ["end", Token.END_KEYWORD ]
+  ["function", Token.FUNCTION_KEYWORD],
+  ["end", Token.END_KEYWORD],
+  ["for", Token.FOR_KEYWORD],
+  ["in", Token.IN_KEYWORD],
+  ["do", Token.DO_KEYWORD],
+  ["print", Token.PRINT_KEYWORD]
 ]);
 
 module.exports = {

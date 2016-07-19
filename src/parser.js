@@ -120,6 +120,89 @@ module.exports = {
       }
     }
 
+    function parseForLoop() {
+      nextToken();
+      if (currentToken.code !== Token.ID) {
+        Logger.LogError("error: expected identifier");
+        return null;
+      }
+
+      var elementIdentifier = new ast.VariableExpressionNode(currentToken.lexeme);
+      nextToken();
+
+      if (currentToken.code !== Token.IN_KEYWORD) {
+        Logger.LogError("error: expected in");
+        return null;
+      }
+
+      nextToken();
+
+      var arrayIdentifier;
+      var e;
+      if (currentToken.code === Token.ID) {
+        arrayIdentifier = new ast.VariableExpressionNode(currentToken.lexeme);
+        nextToken();
+      } else if (e = parseExpression()) {
+        if (e instanceof ast.ListGeneratorNode) {
+          arrayIdentifier = e;
+        } else {
+          Logger.LogError("error: expected expression to be a list generator");
+          return null;
+        }
+      } else {
+        Logger.LogError("error: expected identifier or list generator");
+        return null;
+      }
+
+      var c;
+      if (c = parseClosure()) {
+        if (arrayIdentifier instanceof ast.ListGeneratorNode) {
+          return new ast.ForLoopWithListGeneratorNode(elementIdentifier, arrayIdentifier, c);
+        } else if (arrayIdentifier instanceof ast.VariableExpressionNode) {
+          return new ast.ForLoopWithVariableNode(elementIdentifier, arrayIdentifier, c);
+        } else {
+          Logger.LogError("error: epxected identifier or list generator");
+          return null;
+        }
+      } else {
+        Logger.LogError("error: expected closure");
+        return null;
+      }
+    }
+
+    function parseClosure() {
+      if (currentToken.code !== Token.DO_KEYWORD) {
+        Logger.LogError("error: expected do");
+        return null;
+      }
+
+      nextToken();
+      consumeNewlineTokens();
+
+      if (s = parseExpressionSequence()) {
+        if (currentToken.code !== Token.END_KEYWORD) {
+          Logger.LogError("error: expected end");
+          return null;
+        }
+        nextToken();
+        return new ast.ClosureNode(s);
+      } else {
+        Logger.LogError("error: expected expression sequence");
+        return null;
+      }
+    }
+
+    function parsePrintStatement() {
+      nextToken();
+
+      if (e = parseExpression()) {
+        return new ast.PrintStatementNode(e);
+      } else {
+        Logger.LogError("error: expected expression");
+        return null;
+      }
+    }
+
     function parsePrimary() {
       if (currentToken.code == Token.ID) {
         return parseIdentifierExpression();
@@ -129,9 +212,13 @@ module.exports = {
         return parseParenExpression();
       } else if (currentToken.code === Token.LEFT_BRACKET) {
         return parseBracketExpression();
+      } else if (currentToken.code === Token.FOR_KEYWORD) {
+        return parseForLoop();
       } else if (currentToken.code === Token.FUNCTION_KEYWORD) {
         return parseDefinition();
-      }else {
+      } else if (currentToken.code === Token.PRINT_KEYWORD) {
+        return parsePrintStatement();
+      } else {
         return null;
       }
     }
@@ -248,9 +335,8 @@ module.exports = {
 
     function parseTopLevelExpression() {
       var e;
-      if (e = parseExpression()) {
-        var expressionSequence = new ast.ExpressionSequenceNode([e]);
-        return new ast.SelfInvokingFunctionNode(expressionSequence);
+      if (s = parseExpressionSequence()) {
+        return new ast.SelfInvokingFunctionNode(s);
       }
       return null;
     }

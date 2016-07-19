@@ -62,5 +62,31 @@ module.exports = {
     this.left = left;
     this.right = right;
     this.codegen = Codegen.generateListGeneratorCode;
+  },
+
+  ForLoopWithVariableNode: function(elementIdentifier, arrayIdentifier, closure) {
+    this.elementIdentifier = elementIdentifier;
+    this.arrayIdentifier = arrayIdentifier;
+    this.closure = closure;
+    this.isStatement = true;
+    this.codegen = Codegen.generateForLoopWithVariableCode;
+  },
+
+  ForLoopWithListGeneratorNode: function(elementIdentifier, listGenerator, closure) {
+    this.elementIdentifier = elementIdentifier;
+    this.listGenerator = listGenerator;
+    this.closure = closure;
+    this.isStatement = true;
+    this.codegen = Codegen.generateForLoopWithListGeneratorCode;
+  },
+
+  ClosureNode: function(body) {
+    this.body = body;
+    this.codegen = Codegen.generateClosureCode;
+  },
+
+  PrintStatementNode: function(expression) {
+    this.expression = expression;
+    this.codegen = Codegen.generatePrintStatementNode;
   }
 }

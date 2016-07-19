@@ -46,11 +46,9 @@ module.exports = {
 
   generateExpressionSequenceCode: function() {
     var code = "";
-    for (var i = 0; i < this.expressions.length - 1; i++) {
-      code += this.expressions[i].codegen() + "; ";
-    }
-    if (this.expressions.length > 0) {
-      code += "return " + this.expressions[this.expressions.length - 1].codegen() + ";";
+    for (var i = 0; i < this.expressions.length; i++) {
+      code += this.expressions[i].codegen();
+      if (!(!!this.expressions[i].isStatement)) { code += ";" }
     }
     return code;
   },
@@ -104,6 +102,34 @@ module.exports = {
     code += "for (var i = " + this.left.codegen() + "; i <= " + this.right.codegen() + "; i++) {";
     code += "list.push(i);";
     code += "} return list;}())";
+    return code;
+  },
+
+  generateClosureCode: function() {
+    var code = "(function() {";
+    code += this.body.codegen();
+    code += "}());";
+    return code;
+  },
+
+  generateForLoopWithVariableCode: function() {
+    var code = "for (var __i = 0; __i < " + this.arrayIdentifier.codegen() + ".length; __i++) {";
+    code += "var " + this.elementIdentifier.codegen() + " = " + this.arrayIdentifier.codegen() + "[__i]" + ";";
+    code += this.closure.codegen();
+    code += "}";
+    return code;
+  },
+
+  generateForLoopWithListGeneratorCode: function() {
+    code = "for (var __i = " + this.listGenerator.left.codegen() + "; __i <= " + this.listGenerator.right.codegen() + "; __i++) {";
+    code += "var " + this.elementIdentifier.codegen() + " = __i;";
+    code += this.closure.codegen();
+    code += "}";
+    return code;
+  },
+
+  generatePrintStatementNode: function() {
+    var code = "console.log(" + this.expression.codegen() + ")";
     return code;
   }
 }

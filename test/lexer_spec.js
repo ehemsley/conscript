@@ -182,6 +182,50 @@ describe('lexer', function() {
       });
     });
 
+    describe('for', function() {
+      var tokens = lexer.tokenize("for num in myNums");
+      it('should generate the correct lexeme for the for keyword', function() {
+        assert.equal(tokens[0].lexeme, 'for');
+      });
+
+      it('should generate the correct token code for the for keyword', function() {
+        assert.equal(tokens[0].code, Token.FOR_KEYWORD);
+      });
+    });
+
+    describe('in', function() {
+      var tokens = lexer.tokenize("for num in myNums");
+      it('should generate the correct lexeme for the in keyword', function() {
+        assert.equal(tokens[2].lexeme, 'in');
+      });
+
+      it('should generate the correct token code for the in keyword', function() {
+        assert.equal(tokens[2].code, Token.IN_KEYWORD);
+      });
+    });
+
+    describe('do', function() {
+      var tokens = lexer.tokenize("for num in myNums do end");
+      it('should generate the correct lexeme for the do keyword', function() {
+        assert.equal(tokens[4].lexeme, 'do');
+      })
+
+      it('should generate the correct token code for the do keyword', function() {
+        assert.equal(tokens[4].code, Token.DO_KEYWORD);
+      });
+    });
+
+    describe('print', function() {
+      var tokens = lexer.tokenize("print");
+      it('should generate the correct lexeme for the print keyword', function() {
+        assert.equal(tokens[0].lexeme, 'print');
+      });
+
+      it('should generate the correct token code for the print keyword', function() {
+        assert.equal(tokens[0].code, Token.PRINT_KEYWORD);
+      });
+    });
+
     describe('point', function() {
       var tokens = lexer.tokenize("myArray.push");
       it('should generate the correct lexeme for the point', function() {

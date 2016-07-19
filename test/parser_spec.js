@@ -94,10 +94,40 @@ describe('parser', function() {
       });
     });
 
+    describe('for loop', function() {
+      it('should parse for loop with identifiers', function() {
+        var result = parser.parse(lexer.tokenize("for elt in myArray do x+1 end"));
+        assert.equal(result[0].body.expressions[0].elementIdentifier.name, 'elt');
+        assert.equal(result[0].body.expressions[0].arrayIdentifier.name, 'myArray');
+        assert.equal(result[0].body.expressions[0].closure.body.expressions[0].operator, Token.ADD_OP);
+      });
+
+      it('should parse for loop using list generator', function() {
+        var result = parser.parse(lexer.tokenize("for i in (1..5) do i*2 end"));
+        assert.equal(result[0].body.expressions[0].elementIdentifier.name, 'i');
+        assert.equal(result[0].body.expressions[0].listGenerator.left.value, 1);
+        assert.equal(result[0].body.expressions[0].closure.body.expressions[0].operator, Token.MULT_OP);
+      });
+    });
+
+    describe('list comprehension', function() {
+      it('should correctly parse list comprehension') //, function() {
+        //var result = parser.parse(lexer.tokenize("for num in myNums do end"));
+        //assert.equal(result[0].body.expressions[0])
+      //});
+    });
+
     describe('functions', function() {
       it('should parse a function definition', function() {
         var result = parser.parse(lexer.tokenize("function add(a,b)\na+b\nend"));
         assert.equal(result[0].body.expressions[0].operator, Token.ADD_OP);
+      });
+    });
+
+    describe('print statements', function() {
+      it('should print a variable', function() {
+        var result = parser.parse(lexer.tokenize("print a"));
+        assert.equal(result[0].body.expressions[0].expression.name, 'a');
       });
     });
   });

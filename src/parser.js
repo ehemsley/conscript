@@ -50,11 +50,12 @@ module.exports = {
       nextToken();
       var expr = parseExpression();
       if (!expr) { return null; }
-      if (currentToken !== ')') {
+      if (currentToken.code !== Token.RIGHT_PAREN) {
         Logger.LogError("expected ')'");
         return null;
       }
       nextToken();
+      return expr;
     }
 
     function parseIdentifierExpression() {

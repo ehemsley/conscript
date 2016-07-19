@@ -86,6 +86,12 @@ describe('parser', function() {
         assert.equal(result[0].body.expressions[0].right.left.value, 1);
         assert.equal(result[0].body.expressions[0].right.right.value, 5);
       });
+
+      it('should correctly parse a list generator wrapped in parens', function() {
+        var result = parser.parse(lexer.tokenize("myArray = (1..5)"));
+        assert.equal(result[0].body.expressions[0].right.left.value, 1);
+        assert.equal(result[0].body.expressions[0].right.right.value, 5);
+      });
     });
 
     describe('functions', function() {

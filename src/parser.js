@@ -139,18 +139,17 @@ module.exports = {
 
       var arrayIdentifier;
       var e;
-      if (currentToken.code === Token.ID) {
-        arrayIdentifier = new ast.VariableExpressionNode(currentToken.lexeme);
-        nextToken();
-      } else if (e = parseExpression()) {
+      if (e = parseExpression()) {
         if (e instanceof ast.ListGeneratorNode) {
           arrayIdentifier = e;
+        } else if (e instanceof ast.VariableExpressionNode) {
+          arrayIdentifier = e;
         } else {
-          Logger.LogError("error: expected expression to be a list generator");
+          Logger.LogError("error: expected expression to be a list generator or identifier");
           return null;
         }
       } else {
-        Logger.LogError("error: expected identifier or list generator");
+        Logger.LogError("error: expected expression");
         return null;
       }
 

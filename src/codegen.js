@@ -98,10 +98,10 @@ module.exports = {
 
   generateListGeneratorCode: function() {
     var code = "(function() {";
-    code += "var list = []; "
-    code += "for (var i = " + this.left.codegen() + "; i <= " + this.right.codegen() + "; i++) {";
-    code += "list.push(i);";
-    code += "} return list;}())";
+    code += "var __list = []; "
+    code += "for (var __i = " + this.left.codegen() + "; __i <= " + this.right.codegen() + "; __i++) {";
+    code += "__list.push(__i);";
+    code += "} return __list;}())";
     return code;
   },
 

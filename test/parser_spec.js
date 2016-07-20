@@ -92,6 +92,12 @@ describe('parser', function() {
         assert.equal(result[0].body.expressions[0].right.left.value, 1);
         assert.equal(result[0].body.expressions[0].right.right.value, 5);
       });
+
+      it('should correctly parse a list generator that uses variables', function() {
+        var result = parser.parse(lexer.tokenize("myArray = three..five"));
+        assert.equal(result[0].body.expressions[0].right.left.name, 'three');
+        assert.equal(result[0].body.expressions[0].right.right.name, 'five');
+      });
     });
 
     describe('for loop', function() {
@@ -102,10 +108,17 @@ describe('parser', function() {
         assert.equal(result[0].body.expressions[0].closure.body.expressions[0].operator, Token.ADD_OP);
       });
 
-      it('should parse for loop using list generator', function() {
+      it('should parse for loop using numerical list generator', function() {
         var result = parser.parse(lexer.tokenize("for i in (1..5) do i*2 end"));
         assert.equal(result[0].body.expressions[0].elementIdentifier.name, 'i');
         assert.equal(result[0].body.expressions[0].listGenerator.left.value, 1);
+        assert.equal(result[0].body.expressions[0].closure.body.expressions[0].operator, Token.MULT_OP);
+      });
+
+      it('should parse for loop using variable list generator', function() {
+        var result = parser.parse(lexer.tokenize("for i in three..five do i*2 end"));
+        assert.equal(result[0].body.expressions[0].elementIdentifier.name, 'i');
+        assert.equal(result[0].body.expressions[0].listGenerator.left.name, 'three');
         assert.equal(result[0].body.expressions[0].closure.body.expressions[0].operator, Token.MULT_OP);
       });
     });

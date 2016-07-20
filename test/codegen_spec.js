@@ -180,7 +180,13 @@ describe('codegen', function() {
     it('should generate correct code for a number list generator', function() {
       var listGeneratorNode = new ast.ListGeneratorNode(new ast.NumberExpressionNode(1), new ast.NumberExpressionNode(5));
       assert.equal(listGeneratorNode.codegen(),
-        "(function() {var list = []; for (var i = 1; i <= 5; i++) {list.push(i);} return list;}())");
+        "(function() {var __list = []; for (var __i = 1; __i <= 5; __i++) {__list.push(__i);} return __list;}())");
+    });
+
+    it('should generate correct code for a list generator using variables', function() {
+      var listGeneratorNode = new ast.ListGeneratorNode(new ast.VariableExpressionNode('three'), new ast.VariableExpressionNode('five'));
+      assert.equal(listGeneratorNode.codegen(),
+        "(function() {var __list = []; for (var __i = three; __i <= five; __i++) {__list.push(__i);} return __list;}())");
     });
   });
 

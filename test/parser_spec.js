@@ -98,6 +98,11 @@ describe('parser', function() {
         assert.equal(result[0].body.expressions[0].right.left.name, 'three');
         assert.equal(result[0].body.expressions[0].right.right.name, 'five');
       });
+
+      it('should correctly parse a list generator that uses a where conditional', function() {
+        var result = parser.parse(lexer.tokenize("(1..10 where do |i| i % 2 == 0 end)"));
+        assert.equal(result[0].body.expressions[0].conditionalClosure.body.expressions[0].left.left.name, 'i');
+      });
     });
 
     describe('for loop', function() {
@@ -105,21 +110,21 @@ describe('parser', function() {
         var result = parser.parse(lexer.tokenize("for elt in myArray do x+1 end"));
         assert.equal(result[0].body.expressions[0].elementIdentifier.name, 'elt');
         assert.equal(result[0].body.expressions[0].arrayIdentifier.name, 'myArray');
-        assert.equal(result[0].body.expressions[0].closure.body.expressions[0].operator, Token.ADD_OP);
+        assert.equal(result[0].body.expressions[0].procedure.body.expressions[0].operator, Token.ADD_OP);
       });
 
       it('should parse for loop using numerical list generator', function() {
         var result = parser.parse(lexer.tokenize("for i in (1..5) do i*2 end"));
         assert.equal(result[0].body.expressions[0].elementIdentifier.name, 'i');
         assert.equal(result[0].body.expressions[0].listGenerator.left.value, 1);
-        assert.equal(result[0].body.expressions[0].closure.body.expressions[0].operator, Token.MULT_OP);
+        assert.equal(result[0].body.expressions[0].procedure.body.expressions[0].operator, Token.MULT_OP);
       });
 
       it('should parse for loop using variable list generator', function() {
         var result = parser.parse(lexer.tokenize("for i in three..five do i*2 end"));
         assert.equal(result[0].body.expressions[0].elementIdentifier.name, 'i');
         assert.equal(result[0].body.expressions[0].listGenerator.left.name, 'three');
-        assert.equal(result[0].body.expressions[0].closure.body.expressions[0].operator, Token.MULT_OP);
+        assert.equal(result[0].body.expressions[0].procedure.body.expressions[0].operator, Token.MULT_OP);
       });
     });
 

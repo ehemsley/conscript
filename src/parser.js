@@ -11,6 +11,7 @@ const PRECEDENCE = new Map([
   [Token.SUB_OP, 20],
   [Token.MULT_OP, 40],
   [Token.DIV_OP, 40],
+  [Token.MOD_OP, 40],
   [Token.COMPARISON_OP, 10],
   [Token.ASSIGN_OP, 1],
   [Token.THROUGH_OP, 60]
@@ -153,12 +154,12 @@ module.exports = {
         return null;
       }
 
-      var c;
-      if (c = parseClosure()) {
+      var p;
+      if (p = parseClosure()) {
         if (arrayIdentifier instanceof ast.ListGeneratorNode) {
-          return new ast.ForLoopWithListGeneratorNode(elementIdentifier, arrayIdentifier, c);
+          return new ast.ForLoopWithListGeneratorNode(elementIdentifier, arrayIdentifier, p);
         } else if (arrayIdentifier instanceof ast.VariableExpressionNode) {
-          return new ast.ForLoopWithVariableNode(elementIdentifier, arrayIdentifier, c);
+          return new ast.ForLoopWithVariableNode(elementIdentifier, arrayIdentifier, p);
         } else {
           Logger.LogError("error: epxected identifier or list generator");
           return null;
@@ -171,11 +172,17 @@ module.exports = {
 
     function parseClosure() {
       if (currentToken.code !== Token.DO_KEYWORD) {
-        Logger.LogError("error: expected do");
         return null;
       }
 
       nextToken();
+
+      var args = [];
+      var a;
+      if (a = parseClosureArgs()) {
+        args = a;
+      }
+
       consumeNewlineTokens();
 
       if (s = parseExpressionSequence()) {
@@ -184,9 +191,33 @@ module.exports = {
           return null;
         }
         nextToken();
-        return new ast.ClosureNode(s);
+        return new ast.ClosureNode(args, s);
       } else {
         Logger.LogError("error: expected expression sequence");
+        return null;
+      }
+    }
+
+    function parseClosureArgs() {
+      if (currentToken.code === Token.BAR) {
+        nextToken();
+        var args = [];
+        while(true) {
+          if (currentToken.code === Token.BAR) {
+            nextToken();
+            break;
+          } else {
+            var v;
+            if (v = parseIdentifierExpression()) {
+              args.push(v);
+            } else {
+              Logger.LogError("error: expected variable identifier");
+              return null;
+            }
+          }
+        }
+        return args;
+      } else {
         return null;
       }
     }
@@ -245,7 +276,11 @@ module.exports = {
     function parseExpression() {
       var left = parsePrimary();
       if (!left) { return null; }
-      return parseBinaryOperationRightSide(0, left);
+      if (currentToken.code == Token.THROUGH_OP) {
+        return parseListGeneratorExpression(left);
+      } else {
+        return parseBinaryOperationRightSide(0, left);
+      }
     }
 
     function parseBinaryOperationRightSide(expressionPrecedence, left) {
@@ -269,12 +304,38 @@ module.exports = {
           if (!right) { return null; }
         }
 
-        if (binaryOperation.code === Token.THROUGH_OP) {
-          left = new ast.ListGeneratorNode(left, right);
+        left = new ast.BinaryExpressionNode(binaryOperation.code, left, right);
+      }
+    }
+
+    function parseListGeneratorExpression(left) {
+      nextToken();
+
+      var right;
+      if (currentToken.code === Token.ID) {
+        right = new ast.VariableExpressionNode(currentToken.lexeme);
+      } else if (currentToken.code === Token.NUM) {
+        right = new ast.NumberExpressionNode(currentToken.lexeme);
+      } else {
+        Logger.LogError("error: expected id or variable");
+        return null;
+      }
+
+      nextToken();
+
+      var conditionalClosure;
+      if (currentToken.code === Token.WHERE_KEYWORD) {
+        nextToken();
+        var c;
+        if (c = parseClosure()) {
+          conditionalClosure = c;
         } else {
-          left = new ast.BinaryExpressionNode(binaryOperation.code, left, right);
+          Logger.LogError("error: expected closure");
+          return null;
         }
       }
+
+      return new ast.ListGeneratorNode(left, right, conditionalClosure);
     }
 
     function parseFunctionSignature() {

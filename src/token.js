@@ -21,5 +21,8 @@ module.exports = {
   FOR_KEYWORD: -20,
   IN_KEYWORD: -21,
   DO_KEYWORD: -22,
-  PRINT_KEYWORD: -23
+  PRINT_KEYWORD: -23,
+  WHERE_KEYWORD: -24,
+  MOD_OP: -25,
+  BAR: -26
 }

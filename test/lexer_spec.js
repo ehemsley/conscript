@@ -96,6 +96,17 @@ describe('lexer', function() {
       });
     });
 
+    describe('mod', function() {
+      var tokens = lexer.tokenize("%");
+      it('should generate the correct lexeme for a mod operator', function() {
+        assert.equal(tokens[0].lexeme, "%");
+      });
+
+      it('should generate teh correct token code for a mod operator', function() {
+        assert.equal(tokens[0].code, Token.MOD_OP);
+      });
+    });
+
     describe('left paren', function() {
       it('should generate the correct lexeme for a left paren', function() {
         assert.equal(tokens[7].lexeme, "(");
@@ -226,6 +237,17 @@ describe('lexer', function() {
       });
     });
 
+    describe('where', function() {
+      var tokens = lexer.tokenize("for i in 3..5 where i % 2 == 0 do i*2 end");
+      it('should generate the correct lexeme for the print keyword', function() {
+        assert.equal(tokens[6].lexeme, 'where');
+      });
+
+      it('should generate the correct token code for the print keyword', function() {
+        assert.equal(tokens[6].code, Token.WHERE_KEYWORD);
+      });
+    });
+
     describe('point', function() {
       var tokens = lexer.tokenize("myArray.push");
       it('should generate the correct lexeme for the point', function() {
@@ -245,6 +267,17 @@ describe('lexer', function() {
 
       it('should generate the correct token code for the through op', function() {
         assert.equal(tokens[2].code, Token.THROUGH_OP);
+      });
+    });
+
+    describe('bar', function() {
+      var tokens = lexer.tokenize("|");
+      it('should generate the correct lexeme for the bar op', function() {
+        assert.equal(tokens[0].lexeme, '|');
+      });
+
+      it('should generate the correct token code for the bar op', function() {
+        assert.equal(tokens[0].code, Token.BAR);
       });
     });
   });

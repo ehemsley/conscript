@@ -188,30 +188,44 @@ describe('codegen', function() {
       assert.equal(listGeneratorNode.codegen(),
         "(function() {var __list = []; for (var __i = three; __i <= five; __i++) {__list.push(__i);} return __list;}())");
     });
+
+    it('should generate correct code for a list generator using a where closure', function() {
+      var firstBinaryExpression = new ast.BinaryExpressionNode(Token.MOD_OP, new ast.VariableExpressionNode('i'), new ast.NumberExpressionNode(2));
+      var secondBinaryExpression = new ast.BinaryExpressionNode(Token.COMPARISON_OP, new ast.NumberExpressionNode(0), firstBinaryExpression);
+      var listGeneratorNode = new ast.ListGeneratorNode(new ast.NumberExpressionNode(1), new ast.NumberExpressionNode(10), new ast.ClosureNode([new ast.VariableExpressionNode('i')], secondBinaryExpression));
+      assert.equal(listGeneratorNode.codegen(),
+        "(function() {var __list = []; var __c = (function(i){i % 2 == 0});for (var __i = 1; __i <= 10; __i++) {if(__c(__i)) {__list.push(__i);}} return __list;}())");
+    });
   });
 
   describe('ClosureNode', function() {
-    it('should generate correct code for a closure', function() {
-      var closure = new ast.ClosureNode(new ast.ExpressionSequenceNode([new ast.BinaryExpressionNode(Token.ASSIGN_OP, new ast.VariableExpressionNode('a'), new ast.VariableExpressionNode('elt'))]));
-      assert.equal(closure.codegen(), '(function() {a = elt;}());')
+    it('should generate correct code for a closure with no args', function() {
+      var closure = new ast.ClosureNode([], new ast.ExpressionSequenceNode([new ast.BinaryExpressionNode(Token.ASSIGN_OP, new ast.VariableExpressionNode('a'), new ast.VariableExpressionNode('elt'))]));
+      assert.equal(closure.codegen(), '(function() {a = elt;})')
+    });
+
+    it('should generate correct code for a closure with one arg', function() {
+      var conditionalExpression = new ast.BinaryExpressionNode(Token.COMPARISON_OP, new ast.BinaryExpressionNode(Token.MOD_OP, new ast.NumberExpressionNode(0), new ast.NumberExpressionNode(2)));
+      var closure = new ast.ClosureNode([new ast.VariableExpressionNode('i')], new ast.ExpressionSequenceNode(conditionalExpression));
+      assert.equal(closure.codegen(), '(function(__i) {__i % 2 == 0})');
     });
   });
 
   describe('ForLoopWithVariableNode', function() {
     it('should generate correct code for a list iterator', function() {
       var identifier = new ast.VariableExpressionNode('myArray');
-      var closure = new ast.ClosureNode(new ast.ExpressionSequenceNode([new ast.BinaryExpressionNode(Token.ASSIGN_OP, new ast.VariableExpressionNode('a'), new ast.VariableExpressionNode('elt'))]));
+      var closure = new ast.ClosureNode([], new ast.ExpressionSequenceNode([new ast.BinaryExpressionNode(Token.ASSIGN_OP, new ast.VariableExpressionNode('a'), new ast.VariableExpressionNode('elt'))]));
       var forLoopNode = new ast.ForLoopWithVariableNode(new ast.VariableExpressionNode('elt'), identifier, closure);
-      assert.equal(forLoopNode.codegen(), 'for (var __i = 0; __i < myArray.length; __i++) {var elt = myArray[__i];(function() {a = elt;}());}');
+      assert.equal(forLoopNode.codegen(), 'for (var __i = 0; __i < myArray.length; __i++) {var elt = myArray[__i];(function() {a = elt;})();}');
     });
   });
 
   describe('ForLoopWithListGeneratorNode', function() {
     it('should generate correct code for a for loop with list generator', function() {
       var listGenerator = new ast.ListGeneratorNode(new ast.NumberExpressionNode(1), new ast.NumberExpressionNode(5));
-      var closure = new ast.ClosureNode(new ast.ExpressionSequenceNode([new ast.BinaryExpressionNode(Token.ASSIGN_OP, new ast.VariableExpressionNode('a'), new ast.VariableExpressionNode('elt'))]));
+      var closure = new ast.ClosureNode([], new ast.ExpressionSequenceNode([new ast.BinaryExpressionNode(Token.ASSIGN_OP, new ast.VariableExpressionNode('a'), new ast.VariableExpressionNode('elt'))]));
       var forLoopNode = new ast.ForLoopWithListGeneratorNode(new ast.VariableExpressionNode('elt'), listGenerator, closure);
-      assert.equal(forLoopNode.codegen(), 'for (var __i = 1; __i <= 5; __i++) {var elt = __i;(function() {a = elt;}());}')
+      assert.equal(forLoopNode.codegen(), 'for (var __i = 1; __i <= 5; __i++) {var elt = __i;(function() {a = elt;})();}')
     });
   });
 

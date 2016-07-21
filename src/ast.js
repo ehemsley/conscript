@@ -58,29 +58,31 @@ module.exports = {
     this.codegen = Codegen.generateArrayCode;
   },
 
-  ListGeneratorNode: function(left, right) {
+  ListGeneratorNode: function(left, right, conditionalClosure) {
     this.left = left;
     this.right = right;
+    this.conditionalClosure = conditionalClosure;
     this.codegen = Codegen.generateListGeneratorCode;
   },
 
-  ForLoopWithVariableNode: function(elementIdentifier, arrayIdentifier, closure) {
+  ForLoopWithVariableNode: function(elementIdentifier, arrayIdentifier, procedure) {
     this.elementIdentifier = elementIdentifier;
     this.arrayIdentifier = arrayIdentifier;
-    this.closure = closure;
+    this.procedure = procedure;
     this.isStatement = true;
     this.codegen = Codegen.generateForLoopWithVariableCode;
   },
 
-  ForLoopWithListGeneratorNode: function(elementIdentifier, listGenerator, closure) {
+  ForLoopWithListGeneratorNode: function(elementIdentifier, listGenerator, procedure) {
     this.elementIdentifier = elementIdentifier;
     this.listGenerator = listGenerator;
-    this.closure = closure;
+    this.procedure = procedure;
     this.isStatement = true;
     this.codegen = Codegen.generateForLoopWithListGeneratorCode;
   },
 
-  ClosureNode: function(body) {
+  ClosureNode: function(args, body) {
+    this.args = args;
     this.body = body;
     this.codegen = Codegen.generateClosureCode;
   },

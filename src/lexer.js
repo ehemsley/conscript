@@ -7,12 +7,14 @@ const CHAR_TO_TOKEN = new Map([
   ['-', Token.SUB_OP],
   ['*', Token.MULT_OP],
   ['/', Token.DIV_OP],
+  ['%', Token.MOD_OP],
   ['(', Token.LEFT_PAREN],
   [')', Token.RIGHT_PAREN],
   ['[', Token.LEFT_BRACKET],
   [']', Token.RIGHT_BRACKET],
   [',', Token.COMMA],
-  ['\n', Token.NEWLINE]
+  ['\n', Token.NEWLINE],
+  ['|', Token.BAR]
 ]);
 
 const REPEATABLE_SINGLE_CHAR_TO_TOKEN = new Map([
@@ -31,7 +33,8 @@ const RESERVED_WORD_TO_TOKEN = new Map([
   ["for", Token.FOR_KEYWORD],
   ["in", Token.IN_KEYWORD],
   ["do", Token.DO_KEYWORD],
-  ["print", Token.PRINT_KEYWORD]
+  ["print", Token.PRINT_KEYWORD],
+  ["where", Token.WHERE_KEYWORD]
 ]);
 
 module.exports = {

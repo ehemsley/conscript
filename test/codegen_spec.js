@@ -178,23 +178,40 @@ describe('codegen', function() {
 
   describe('ListGeneratorNode', function() {
     it('should generate correct code for a number list generator', function() {
-      var listGeneratorNode = new ast.ListGeneratorNode(new ast.NumberExpressionNode(1), new ast.NumberExpressionNode(5));
+      var listGeneratorNode = new ast.ListGeneratorNode(new ast.NumberExpressionNode(1), new ast.NumberExpressionNode(5), new ast.NumberExpressionNode(1));
       expect(listGeneratorNode.codegen()).to.equal(
-        "(function() {var __list = []; for (var __i = 1; __i <= 5; __i++) {__list.push(__i);} return __list;}())");
+        "(function() {var __list = []; for (var __i = 1; __i <= 5; __i+=1) {__list.push(__i);} return __list;}())");
     });
 
     it('should generate correct code for a list generator using variables', function() {
-      var listGeneratorNode = new ast.ListGeneratorNode(new ast.VariableExpressionNode('three'), new ast.VariableExpressionNode('five'));
+      var listGeneratorNode = new ast.ListGeneratorNode(new ast.VariableExpressionNode('three'), new ast.VariableExpressionNode('five'), new ast.NumberExpressionNode(1));
       expect(listGeneratorNode.codegen()).to.equal(
-        "(function() {var __list = []; for (var __i = three; __i <= five; __i++) {__list.push(__i);} return __list;}())");
+        "(function() {var __list = []; for (var __i = three; __i <= five; __i+=1) {__list.push(__i);} return __list;}())");
     });
 
     it('should generate correct code for a list generator using a where closure', function() {
       var firstBinaryExpression = new ast.BinaryExpressionNode(Token.MOD_OP, new ast.VariableExpressionNode('i'), new ast.NumberExpressionNode(2));
       var secondBinaryExpression = new ast.BinaryExpressionNode(Token.COMPARISON_OP, firstBinaryExpression, new ast.NumberExpressionNode(0));
-      var listGeneratorNode = new ast.ListGeneratorNode(new ast.NumberExpressionNode(1), new ast.NumberExpressionNode(10), new ast.ClosureNode([new ast.VariableExpressionNode('i')], secondBinaryExpression));
+      var listGeneratorNode = new ast.ListGeneratorNode(new ast.NumberExpressionNode(1), new ast.NumberExpressionNode(10), new ast.NumberExpressionNode(1), new ast.ClosureNode([new ast.VariableExpressionNode('i')], secondBinaryExpression));
       expect(listGeneratorNode.codegen()).to.equal(
-        "(function() {var __list = []; var __c = (function(i) {i % 2 === 0});for (var __i = 1; __i <= 10; __i++) {if (__c(__i)) {__list.push(__i);}} return __list;}())");
+        "(function() {var __list = []; var __c = (function(i) {i % 2 === 0});for (var __i = 1; __i <= 10; __i+=1) {if (__c(__i)) {__list.push(__i);}} return __list;}())"
+      );
+    });
+
+    it('should generate correct code for a list generator using a by incrementor', function() {
+      var listGeneratorNode = new ast.ListGeneratorNode(new ast.NumberExpressionNode(1), new ast.NumberExpressionNode(10), new ast.NumberExpressionNode(2));
+      expect(listGeneratorNode.codegen()).to.equal(
+        "(function() {var __list = []; for (var __i = 1; __i <= 10; __i+=2) {__list.push(__i);} return __list;}())"
+      );
+    });
+
+    it('should generate correct code for a list generator using a by increment and a where closure', function() {
+      var firstBinaryExpression = new ast.BinaryExpressionNode(Token.MOD_OP, new ast.VariableExpressionNode('i'), new ast.NumberExpressionNode(2));
+      var secondBinaryExpression = new ast.BinaryExpressionNode(Token.COMPARISON_OP, firstBinaryExpression, new ast.NumberExpressionNode(0));
+      var listGeneratorNode = new ast.ListGeneratorNode(new ast.NumberExpressionNode(1), new ast.NumberExpressionNode(10), new ast.NumberExpressionNode(2), new ast.ClosureNode([new ast.VariableExpressionNode('i')], secondBinaryExpression));
+      expect(listGeneratorNode.codegen()).to.equal(
+        "(function() {var __list = []; var __c = (function(i) {i % 2 === 0});for (var __i = 1; __i <= 10; __i+=2) {if (__c(__i)) {__list.push(__i);}} return __list;}())"
+      );
     });
   });
 
@@ -221,10 +238,10 @@ describe('codegen', function() {
     });
 
     it('should generate correct code for a for loop with list generator', function() {
-      var listGenerator = new ast.ListGeneratorNode(new ast.NumberExpressionNode(1), new ast.NumberExpressionNode(5));
+      var listGenerator = new ast.ListGeneratorNode(new ast.NumberExpressionNode(1), new ast.NumberExpressionNode(5), new ast.NumberExpressionNode(1));
       var closure = new ast.ClosureNode([], new ast.ExpressionSequenceNode([new ast.BinaryExpressionNode(Token.ASSIGN_OP, new ast.VariableExpressionNode('a'), new ast.VariableExpressionNode('elt'))]));
       var forLoopNode = new ast.ForLoopNode(new ast.VariableExpressionNode('elt'), listGenerator, closure);
-      expect(forLoopNode.codegen()).to.equal('(function() {__list = (function() {var __list = []; for (var __i = 1; __i <= 5; __i++) {__list.push(__i);} return __list;}());for (var __i = 0; __i < __list.length; __i++) {var elt = __list[__i];(function() {return a = elt;})();}})();')
+      expect(forLoopNode.codegen()).to.equal('(function() {__list = (function() {var __list = []; for (var __i = 1; __i <= 5; __i+=1) {__list.push(__i);} return __list;}());for (var __i = 0; __i < __list.length; __i++) {var elt = __list[__i];(function() {return a = elt;})();}})();')
     });
   });
 

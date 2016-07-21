@@ -313,6 +313,20 @@ module.exports = {
 
       nextToken();
 
+      var increment = new ast.NumberExpressionNode(1);
+      if (currentToken.code === Token.BY_KEYWORD) {
+        nextToken();
+        var id;
+        if (currentToken.code === Token.ID) {
+          increment = parseIdentifierExpression();
+        } else if (currentToken.code === Token.NUM) {
+          increment = parseNumberExpression();
+        } else {
+          Logger.LogError("error: expected id or number");
+          return null;
+        }
+      }
+
       var conditionalClosure;
       if (currentToken.code === Token.WHERE_KEYWORD) {
         nextToken();
@@ -325,7 +339,7 @@ module.exports = {
         }
       }
 
-      return new ast.ListGeneratorNode(left, right, conditionalClosure);
+      return new ast.ListGeneratorNode(left, right, increment, conditionalClosure);
     }
 
     function parseFunctionSignature() {

@@ -129,11 +129,18 @@ describe('parser', function() {
     });
 
     describe('list generator', function() {
-      it('should correctly parse list generators', function() {
+      it('should correctly parse list generator with a conditional closure', function() {
         var result = parser.parse(lexer.tokenize("(1..10 where do |i| i % 2 == 0 end)"));
         assert.equal(result[0].body.expressions[0].left.value, 1);
         assert.equal(result[0].body.expressions[0].right.value, 10);
         assert.equal(result[0].body.expressions[0].conditionalClosure.body.expressions[0].left.left.name, 'i');
+      });
+
+      it('should correctly parse list generator with a custom increment', function() {
+        var result = parser.parse(lexer.tokenize("(1..10 by 2)"));
+        assert.equal(result[0].body.expressions[0].left.value, 1);
+        assert.equal(result[0].body.expressions[0].right.value, 10);
+        assert.equal(result[0].body.expressions[0].increment.value, 2);
       });
     });
 

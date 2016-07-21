@@ -238,13 +238,24 @@ describe('lexer', function() {
     });
 
     describe('where', function() {
-      var tokens = lexer.tokenize("for i in 3..5 where i % 2 == 0 do i*2 end");
+      var tokens = lexer.tokenize("i in (3..5 where do |i| i % 2 == 0 end) do i*2 end");
       it('should generate the correct lexeme for the print keyword', function() {
         assert.equal(tokens[6].lexeme, 'where');
       });
 
       it('should generate the correct token code for the print keyword', function() {
         assert.equal(tokens[6].code, Token.WHERE_KEYWORD);
+      });
+    });
+
+    describe('by', function() {
+      var tokens = lexer.tokenize("for i in 1..10 by 2");
+      it('should generate the correct lexeme for the by keyword', function() {
+        assert.equal(tokens[6].lexeme, 'by');
+      });
+
+      it('should generate the correct token code for the by keyword', function() {
+        assert.equal(tokens[6].code, Token.BY_KEYWORD);
       });
     });
 

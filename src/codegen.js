@@ -106,7 +106,7 @@ module.exports = {
     if (this.conditionalClosure !== undefined) {
       code += "var __c = " + this.conditionalClosure.codegen() + ";";
     }
-    code += "for (var __i = " + this.left.codegen() + "; __i <= " + this.right.codegen() + "; __i++) {";
+    code += "for (var __i = " + this.left.codegen() + "; __i <= " + this.right.codegen() + "; __i+=" + this.increment.codegen() + ") {";
     if (this.conditionalClosure !== undefined) {
       code += "if (__c(__i)) {";
     }

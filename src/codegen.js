@@ -52,7 +52,7 @@ module.exports = {
         code += "return ";
       }
       code += this.expressions[i].codegen();
-      if (!(!!this.expressions[i].isStatement)) { code += ";" }
+      if (!this.expressions[i].isStatement) { code += ";" }
     }
     return code;
   },

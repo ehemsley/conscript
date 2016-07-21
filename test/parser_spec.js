@@ -128,11 +128,13 @@ describe('parser', function() {
       });
     });
 
-    describe('list comprehension', function() {
-      it('should correctly parse list comprehension') //, function() {
-        //var result = parser.parse(lexer.tokenize("for num in myNums do end"));
-        //assert.equal(result[0].body.expressions[0])
-      //});
+    describe('list generator', function() {
+      it('should correctly parse list generators', function() {
+        var result = parser.parse(lexer.tokenize("(1..10 where do |i| i % 2 == 0 end)"));
+        assert.equal(result[0].body.expressions[0].left.value, 1);
+        assert.equal(result[0].body.expressions[0].right.value, 10);
+        assert.equal(result[0].body.expressions[0].conditionalClosure.body.expressions[0].left.left.name, 'i');
+      });
     });
 
     describe('functions', function() {

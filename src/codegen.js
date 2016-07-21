@@ -125,18 +125,9 @@ module.exports = {
     return code;
   },
 
-  generateForLoopWithVariableCode: function() {
+  generateForLoopCode: function() {
     var code = "(function() {";
-    code += "for (var __i = 0; __i < " + this.arrayIdentifier.codegen() + ".length; __i++) {";
-    code += "var " + this.elementIdentifier.codegen() + " = " + this.arrayIdentifier.codegen() + "[__i]" + ";";
-    code += this.procedure.codegen();
-    code += "();})();";
-    return code;
-  },
-
-  generateForLoopWithListGeneratorCode: function() {
-    var code = "(function() {"
-    code += "__list = " + this.listGenerator.codegen() + ";";
+    code += "__list = " + this.listNode.codegen() + ";";
     code += "for (var __i = 0; __i < __list.length; __i++) {";
     code += "var " + this.elementIdentifier.codegen() + " = __list[__i];";
     code += this.procedure.codegen();

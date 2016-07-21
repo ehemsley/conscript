@@ -65,20 +65,12 @@ module.exports = {
     this.codegen = Codegen.generateListGeneratorCode;
   },
 
-  ForLoopWithVariableNode: function(elementIdentifier, arrayIdentifier, procedure) {
+  ForLoopNode: function(elementIdentifier, listNode, procedure) {
     this.elementIdentifier = elementIdentifier;
-    this.arrayIdentifier = arrayIdentifier;
+    this.listNode = listNode;
     this.procedure = procedure;
     this.isStatement = true;
-    this.codegen = Codegen.generateForLoopWithVariableCode;
-  },
-
-  ForLoopWithListGeneratorNode: function(elementIdentifier, listGenerator, procedure) {
-    this.elementIdentifier = elementIdentifier;
-    this.listGenerator = listGenerator;
-    this.procedure = procedure;
-    this.isStatement = true;
-    this.codegen = Codegen.generateForLoopWithListGeneratorCode;
+    this.codegen = Codegen.generateForLoopCode;
   },
 
   ClosureNode: function(args, body) {

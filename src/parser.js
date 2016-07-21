@@ -138,14 +138,11 @@ module.exports = {
 
       nextToken();
 
-      var arrayIdentifier;
-      var e;
-      if (e = parseExpression()) {
-        if (e instanceof ast.ListGeneratorNode) {
-          arrayIdentifier = e;
-        } else if (e instanceof ast.VariableExpressionNode) {
-          arrayIdentifier = e;
-        } else {
+      var listExpression;
+      if (listExpression = parseExpression()) {
+        if (!(listExpression instanceof ast.ListGeneratorNode ||
+              listExpression instanceof ast.VariableExpressionNode))
+        {
           Logger.LogError("error: expected expression to be a list generator or identifier");
           return null;
         }
@@ -156,14 +153,7 @@ module.exports = {
 
       var p;
       if (p = parseClosure()) {
-        if (arrayIdentifier instanceof ast.ListGeneratorNode) {
-          return new ast.ForLoopWithListGeneratorNode(elementIdentifier, arrayIdentifier, p);
-        } else if (arrayIdentifier instanceof ast.VariableExpressionNode) {
-          return new ast.ForLoopWithVariableNode(elementIdentifier, arrayIdentifier, p);
-        } else {
-          Logger.LogError("error: epxected identifier or list generator");
-          return null;
-        }
+        return new ast.ForLoopNode(elementIdentifier, listExpression, p);
       } else {
         Logger.LogError("error: expected closure");
         return null;

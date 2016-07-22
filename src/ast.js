@@ -58,9 +58,30 @@ module.exports = {
     this.codegen = Codegen.generateArrayCode;
   },
 
-  ListGeneratorNode: function(left, right) {
+  ListGeneratorNode: function(left, right, increment, conditionalClosure) {
     this.left = left;
     this.right = right;
+    this.increment = increment;
+    this.conditionalClosure = conditionalClosure;
     this.codegen = Codegen.generateListGeneratorCode;
+  },
+
+  ForLoopNode: function(elementIdentifier, listNode, procedure) {
+    this.elementIdentifier = elementIdentifier;
+    this.listNode = listNode;
+    this.procedure = procedure;
+    this.isStatement = true;
+    this.codegen = Codegen.generateForLoopCode;
+  },
+
+  ClosureNode: function(args, body) {
+    this.args = args;
+    this.body = body;
+    this.codegen = Codegen.generateClosureCode;
+  },
+
+  PrintStatementNode: function(expression) {
+    this.expression = expression;
+    this.codegen = Codegen.generatePrintStatementNode;
   }
 }

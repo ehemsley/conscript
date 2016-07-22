@@ -92,12 +92,69 @@ describe('parser', function() {
         assert.equal(result[0].body.expressions[0].right.left.value, 1);
         assert.equal(result[0].body.expressions[0].right.right.value, 5);
       });
+
+      it('should correctly parse a list generator that uses variables', function() {
+        var result = parser.parse(lexer.tokenize("myArray = three..five"));
+        assert.equal(result[0].body.expressions[0].right.left.name, 'three');
+        assert.equal(result[0].body.expressions[0].right.right.name, 'five');
+      });
+
+      it('should correctly parse a list generator that uses a where conditional', function() {
+        var result = parser.parse(lexer.tokenize("(1..10 where do |i| i % 2 == 0 end)"));
+        assert.equal(result[0].body.expressions[0].conditionalClosure.body.expressions[0].left.left.name, 'i');
+      });
+    });
+
+    describe('for loop', function() {
+      it('should parse for loop with identifiers', function() {
+        var result = parser.parse(lexer.tokenize("for elt in myArray do x+1 end"));
+        assert.equal(result[0].body.expressions[0].elementIdentifier.name, 'elt');
+        assert.equal(result[0].body.expressions[0].listNode.name, 'myArray');
+        assert.equal(result[0].body.expressions[0].procedure.body.expressions[0].operator, Token.ADD_OP);
+      });
+
+      it('should parse for loop using numerical list generator', function() {
+        var result = parser.parse(lexer.tokenize("for i in (1..5) do i*2 end"));
+        assert.equal(result[0].body.expressions[0].elementIdentifier.name, 'i');
+        assert.equal(result[0].body.expressions[0].listNode.left.value, 1);
+        assert.equal(result[0].body.expressions[0].procedure.body.expressions[0].operator, Token.MULT_OP);
+      });
+
+      it('should parse for loop using variable list generator', function() {
+        var result = parser.parse(lexer.tokenize("for i in three..five do i*2 end"));
+        assert.equal(result[0].body.expressions[0].elementIdentifier.name, 'i');
+        assert.equal(result[0].body.expressions[0].listNode.left.name, 'three');
+        assert.equal(result[0].body.expressions[0].procedure.body.expressions[0].operator, Token.MULT_OP);
+      });
+    });
+
+    describe('list generator', function() {
+      it('should correctly parse list generator with a conditional closure', function() {
+        var result = parser.parse(lexer.tokenize("(1..10 where do |i| i % 2 == 0 end)"));
+        assert.equal(result[0].body.expressions[0].left.value, 1);
+        assert.equal(result[0].body.expressions[0].right.value, 10);
+        assert.equal(result[0].body.expressions[0].conditionalClosure.body.expressions[0].left.left.name, 'i');
+      });
+
+      it('should correctly parse list generator with a custom increment', function() {
+        var result = parser.parse(lexer.tokenize("(1..10 by 2)"));
+        assert.equal(result[0].body.expressions[0].left.value, 1);
+        assert.equal(result[0].body.expressions[0].right.value, 10);
+        assert.equal(result[0].body.expressions[0].increment.value, 2);
+      });
     });
 
     describe('functions', function() {
       it('should parse a function definition', function() {
         var result = parser.parse(lexer.tokenize("function add(a,b)\na+b\nend"));
         assert.equal(result[0].body.expressions[0].operator, Token.ADD_OP);
+      });
+    });
+
+    describe('print statements', function() {
+      it('should print a variable', function() {
+        var result = parser.parse(lexer.tokenize("print a"));
+        assert.equal(result[0].body.expressions[0].expression.name, 'a');
       });
     });
   });

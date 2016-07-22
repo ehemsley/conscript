@@ -6,6 +6,7 @@ const OPERATOR_TO_CODE = new Map([
   [Token.SUB_OP, "-"],
   [Token.MULT_OP, "*"],
   [Token.DIV_OP, "/"],
+  [Token.MOD_OP, "%"],
   [Token.COMPARISON_OP, "==="]
 ]);
 
@@ -44,13 +45,14 @@ module.exports = {
     return this.left.codegen() + " " + operatorCode + " " + this.right.codegen();
   },
 
-  generateExpressionSequenceCode: function() {
+  generateExpressionSequenceCode: function(finalShouldReturn) {
     var code = "";
-    for (var i = 0; i < this.expressions.length - 1; i++) {
-      code += this.expressions[i].codegen() + "; ";
-    }
-    if (this.expressions.length > 0) {
-      code += "return " + this.expressions[this.expressions.length - 1].codegen() + ";";
+    for (var i = 0; i < this.expressions.length; i++) {
+      if (finalShouldReturn !== undefined && i === this.expressions.length - 1) {
+        code += "return ";
+      }
+      code += this.expressions[i].codegen();
+      if (!this.expressions[i].isStatement) { code += ";" }
     }
     return code;
   },
@@ -100,10 +102,41 @@ module.exports = {
 
   generateListGeneratorCode: function() {
     var code = "(function() {";
-    code += "var list = []; "
-    code += "for (var i = " + this.left.codegen() + "; i <= " + this.right.codegen() + "; i++) {";
-    code += "list.push(i);";
-    code += "} return list;}())";
+    code += "var __list = []; "
+    if (this.conditionalClosure !== undefined) {
+      code += "var __c = " + this.conditionalClosure.codegen() + ";";
+    }
+    code += "for (var __i = " + this.left.codegen() + "; __i <= " + this.right.codegen() + "; __i+=" + this.increment.codegen() + ") {";
+    if (this.conditionalClosure !== undefined) {
+      code += "if (__c(__i)) {";
+    }
+    code += "__list.push(__i);";
+    if (this.conditionalClosure !== undefined) {
+      code += "}";
+    }
+    code += "} return __list;}())";
+    return code;
+  },
+
+  generateClosureCode: function() {
+    var code = "(function(" + generateArgumentCode(this.args) + ") {";
+    code += this.body.codegen(true);
+    code += "})";
+    return code;
+  },
+
+  generateForLoopCode: function() {
+    var code = "(function() {";
+    code += "__list = " + this.listNode.codegen() + ";";
+    code += "for (var __i = 0; __i < __list.length; __i++) {";
+    code += "var " + this.elementIdentifier.codegen() + " = __list[__i];";
+    code += this.procedure.codegen();
+    code += "();}})();";
+    return code;
+  },
+
+  generatePrintStatementNode: function() {
+    var code = "console.log(" + this.expression.codegen() + ")";
     return code;
   }
 }

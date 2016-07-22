@@ -11,6 +11,7 @@ const PRECEDENCE = new Map([
   [Token.SUB_OP, 20],
   [Token.MULT_OP, 40],
   [Token.DIV_OP, 40],
+  [Token.MOD_OP, 40],
   [Token.COMPARISON_OP, 10],
   [Token.ASSIGN_OP, 1],
   [Token.THROUGH_OP, 60]
@@ -120,6 +121,108 @@ module.exports = {
       }
     }
 
+    function parseForLoop() {
+      nextToken();
+      if (currentToken.code !== Token.ID) {
+        Logger.LogError("error: expected identifier");
+        return null;
+      }
+
+      var elementIdentifier = new ast.VariableExpressionNode(currentToken.lexeme);
+      nextToken();
+
+      if (currentToken.code !== Token.IN_KEYWORD) {
+        Logger.LogError("error: expected in");
+        return null;
+      }
+
+      nextToken();
+
+      var listExpression;
+      if (listExpression = parseExpression()) {
+        if (!(listExpression instanceof ast.ListGeneratorNode ||
+              listExpression instanceof ast.VariableExpressionNode))
+        {
+          Logger.LogError("error: expected expression to be a list generator or identifier");
+          return null;
+        }
+      } else {
+        Logger.LogError("error: expected expression");
+        return null;
+      }
+
+      var p;
+      if (p = parseClosure()) {
+        return new ast.ForLoopNode(elementIdentifier, listExpression, p);
+      } else {
+        Logger.LogError("error: expected closure");
+        return null;
+      }
+    }
+
+    function parseClosure() {
+      if (currentToken.code !== Token.DO_KEYWORD) {
+        return null;
+      }
+
+      nextToken();
+
+      var args = [];
+      var a;
+      if (a = parseClosureArgs()) {
+        args = a;
+      }
+
+      consumeNewlineTokens();
+
+      if (s = parseExpressionSequence()) {
+        if (currentToken.code !== Token.END_KEYWORD) {
+          Logger.LogError("error: expected end");
+          return null;
+        }
+        nextToken();
+        return new ast.ClosureNode(args, s);
+      } else {
+        Logger.LogError("error: expected expression sequence");
+        return null;
+      }
+    }
+
+    function parseClosureArgs() {
+      if (currentToken.code === Token.BAR) {
+        nextToken();
+        var args = [];
+        while(true) {
+          if (currentToken.code === Token.BAR) {
+            nextToken();
+            break;
+          } else {
+            var v;
+            if (v = parseIdentifierExpression()) {
+              args.push(v);
+            } else {
+              Logger.LogError("error: expected variable identifier");
+              return null;
+            }
+          }
+        }
+        return args;
+      } else {
+        return null;
+      }
+    }
+
+    function parsePrintStatement() {
+      nextToken();
+
+      if (e = parseExpression()) {
+        return new ast.PrintStatementNode(e);
+      } else {
+        Logger.LogError("error: expected expression");
+        return null;
+      }
+    }
+
     function parsePrimary() {
       if (currentToken.code == Token.ID) {
         return parseIdentifierExpression();
@@ -129,9 +232,13 @@ module.exports = {
         return parseParenExpression();
       } else if (currentToken.code === Token.LEFT_BRACKET) {
         return parseBracketExpression();
+      } else if (currentToken.code === Token.FOR_KEYWORD) {
+        return parseForLoop();
       } else if (currentToken.code === Token.FUNCTION_KEYWORD) {
         return parseDefinition();
-      }else {
+      } else if (currentToken.code === Token.PRINT_KEYWORD) {
+        return parsePrintStatement();
+      } else {
         return null;
       }
     }
@@ -159,7 +266,11 @@ module.exports = {
     function parseExpression() {
       var left = parsePrimary();
       if (!left) { return null; }
-      return parseBinaryOperationRightSide(0, left);
+      if (currentToken.code == Token.THROUGH_OP) {
+        return parseListGeneratorExpression(left);
+      } else {
+        return parseBinaryOperationRightSide(0, left);
+      }
     }
 
     function parseBinaryOperationRightSide(expressionPrecedence, left) {
@@ -183,12 +294,52 @@ module.exports = {
           if (!right) { return null; }
         }
 
-        if (binaryOperation.code === Token.THROUGH_OP) {
-          left = new ast.ListGeneratorNode(left, right);
+        left = new ast.BinaryExpressionNode(binaryOperation.code, left, right);
+      }
+    }
+
+    function parseListGeneratorExpression(left) {
+      nextToken();
+
+      var right;
+      if (currentToken.code === Token.ID) {
+        right = new ast.VariableExpressionNode(currentToken.lexeme);
+      } else if (currentToken.code === Token.NUM) {
+        right = new ast.NumberExpressionNode(currentToken.lexeme);
+      } else {
+        Logger.LogError("error: expected id or variable");
+        return null;
+      }
+
+      nextToken();
+
+      var increment = new ast.NumberExpressionNode(1);
+      if (currentToken.code === Token.BY_KEYWORD) {
+        nextToken();
+        var id;
+        if (currentToken.code === Token.ID) {
+          increment = parseIdentifierExpression();
+        } else if (currentToken.code === Token.NUM) {
+          increment = parseNumberExpression();
         } else {
-          left = new ast.BinaryExpressionNode(binaryOperation.code, left, right);
+          Logger.LogError("error: expected id or number");
+          return null;
         }
       }
+
+      var conditionalClosure;
+      if (currentToken.code === Token.WHERE_KEYWORD) {
+        nextToken();
+        var c;
+        if (c = parseClosure()) {
+          conditionalClosure = c;
+        } else {
+          Logger.LogError("error: expected closure");
+          return null;
+        }
+      }
+
+      return new ast.ListGeneratorNode(left, right, increment, conditionalClosure);
     }
 
     function parseFunctionSignature() {
@@ -248,9 +399,8 @@ module.exports = {
 
     function parseTopLevelExpression() {
       var e;
-      if (e = parseExpression()) {
-        var expressionSequence = new ast.ExpressionSequenceNode([e]);
-        return new ast.SelfInvokingFunctionNode(expressionSequence);
+      if (s = parseExpressionSequence()) {
+        return new ast.SelfInvokingFunctionNode(s);
       }
       return null;
     }

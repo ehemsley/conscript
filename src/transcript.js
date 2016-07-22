@@ -8,7 +8,6 @@ module.exports = {
   compile: function(string) {
     var tokens = Lexer.tokenize(string);
     var ast = Parser.parse(tokens);
-    Analyzer.analyze(ast); //fold this into the code generator?
     var code = Codegen.generate(ast);
     var pretty_code = Beautify(code, { indent_size: 2 });
     return pretty_code + "\n";

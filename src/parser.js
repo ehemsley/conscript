@@ -399,8 +399,8 @@ module.exports = {
 
     function parseTopLevelExpression() {
       var e;
-      if (s = parseExpressionSequence()) {
-        return new ast.SelfInvokingFunctionNode(s);
+      if (e = parseExpression()) {
+        return e;
       }
       return null;
     }
@@ -431,7 +431,7 @@ module.exports = {
           Logger.LogError("Error: unexpected end of file");
           return null;
         } else if (currentToken.code === Token.EOF) {
-          return expressions;
+          return new ast.SelfInvokingFunctionNode(new ast.ExpressionSequenceNode(expressions));
         } else if (currentToken.code === Token.FUNCTION_KEYWORD) {
           expressions.push(handleDefinition());
         } else {

@@ -3,12 +3,12 @@ const Token = require('../src/token.js');
 const ast = require('../src/ast.js');
 const parser = require('../src/parser.js');
 const lexer = require('../src/lexer.js');
-const codegen = require('../src/codegen.js');
+const Codegen = require('../src/codegen.js');
 
 describe('codegen', function() {
   describe('generate', function() {
-    it('should wrap naked expressions in a self-invoking function', function(){
-      expect(codegen.generate(parser.parse(lexer.tokenize("12 + 1234")))).to.equal("(function() {12 + 1234;})();");
+    it('should wrap a naked expression in a self-invoking function', function(){
+      expect(Codegen.generate(parser.parse(lexer.tokenize("12 + 1234")))).to.equal("(function() {12 + 1234;})();");
     });
   });
 
@@ -142,7 +142,7 @@ describe('codegen', function() {
     it('should generate proper self invoking function code with empty body', function() {
       var emptyBody = new ast.ExpressionSequenceNode([]);
       var selfInvokingFunctionNode = new ast.SelfInvokingFunctionNode(emptyBody);
-      expect(selfInvokingFunctionNode.codegen()).to.equal('(function() {})();');
+      expect(Codegen.generate(selfInvokingFunctionNode)).to.equal('(function() {})();');
     });
 
     it('should generate proper self invoking function code with expression sequence and one argument', function() {
@@ -150,7 +150,7 @@ describe('codegen', function() {
       var secondExpression = new ast.BinaryExpressionNode(Token.ADD_OP, new ast.VariableExpressionNode("myVar"), new ast.VariableExpressionNode("givenVar"));
       var expressionSequenceNode = new ast.ExpressionSequenceNode([firstExpression, secondExpression]);
       var selfInvokingFunctionNode = new ast.SelfInvokingFunctionNode(expressionSequenceNode, [new ast.VariableExpressionNode("givenVar")], [new ast.NumberExpressionNode(2)]);
-      expect(selfInvokingFunctionNode.codegen()).to.equal('(function(givenVar) {myVar = 3;myVar + givenVar;})(2);');
+      expect(Codegen.generate(selfInvokingFunctionNode)).to.equal('(function(givenVar) {var myVar;myVar = 3;myVar + givenVar;})(2);');
     });
   });
 

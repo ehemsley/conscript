@@ -1,5 +1,4 @@
 const Token = require('./token.js');
-const SymbolTable = require('./symbol_table.js');
 const Analyzer = require('./analyzer.js');
 const Codegen = require('./codegen.js');
 const Logger = require('./logger.js');
@@ -7,12 +6,13 @@ const Logger = require('./logger.js');
 module.exports = {
   NumberExpressionNode: function(value) {
     this.value = value;
+    this.analyze = function(){};
     this.codegen = Codegen.generateNumberExpressionCode;
   },
 
   VariableExpressionNode: function(name) {
     this.name = name;
-    this.localToScope = false;
+    this.analyze = Analyzer.analyzeVariableExpressionNode;
     this.codegen = Codegen.generateVariableExpressionCode;
   },
 
@@ -88,6 +88,7 @@ module.exports = {
 
   PrintStatementNode: function(expression) {
     this.expression = expression;
+    this.analyze = function(){};
     this.codegen = Codegen.generatePrintStatementNode;
   }
 }

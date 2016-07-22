@@ -1,4 +1,5 @@
 const Token = require('./token.js');
+const Analyzer = require('./analyzer.js');
 
 const OPERATOR_TO_CODE = new Map([
   [Token.ASSIGN_OP, "="],
@@ -20,13 +21,9 @@ function generateArgumentCode(args) {
 }
 
 module.exports = {
-  // TODO: top level should probably just be a function node so we don't need a list
   generate: function(ast) {
-    var output = "";
-    for (var i = 0; i < ast.length; i++) {
-      output += ast[i].codegen();
-    }
-    return output;
+    Analyzer.analyze(ast);
+    return ast.codegen();
   },
 
   generateNumberExpressionCode: function() {
@@ -34,12 +31,7 @@ module.exports = {
   },
 
   generateVariableExpressionCode: function() {
-    var code = "";
-    if (this.localToScope) {
-      code += "var ";
-    }
-    code += this.name;
-    return code;
+    return this.name;
   },
 
   generateBinaryExpressionCode: function() {
@@ -87,6 +79,7 @@ module.exports = {
     var code = "(function(";
     code += generateArgumentCode(this.signatureArgs);
     code += ") {";
+    code += this.symbolTable.generateDeclarations();
     code += this.body.codegen();
     code += "})("
     code += generateArgumentCode(this.callArgs);

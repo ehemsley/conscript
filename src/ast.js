@@ -1,4 +1,6 @@
 const Token = require('./token.js');
+const SymbolTable = require('./symbol_table.js');
+const Analyzer = require('./analyzer.js');
 const Codegen = require('./codegen.js');
 const Logger = require('./logger.js');
 
@@ -10,6 +12,7 @@ module.exports = {
 
   VariableExpressionNode: function(name) {
     this.name = name;
+    this.localToScope = false;
     this.codegen = Codegen.generateVariableExpressionCode;
   },
 
@@ -19,6 +22,7 @@ module.exports = {
     this.left.parent = this;
     this.right = right;
     this.right.parent = this;
+    this.analyze = Analyzer.analyzeBinaryExpressionNode;
     this.codegen = Codegen.generateBinaryExpressionCode;
   },
 
@@ -30,6 +34,7 @@ module.exports = {
 
   ExpressionSequenceNode: function(expressions) {
     this.expressions = expressions;
+    this.analyze = Analyzer.analyzeExpressionSequenceNode;
     this.codegen = Codegen.generateExpressionSequenceCode;
   },
 
@@ -50,6 +55,7 @@ module.exports = {
     this.body = body;
     this.signatureArgs = typeof signatureArgs !== 'undefined' ?  signatureArgs : [];
     this.callArgs = typeof callArgs !== 'undefined' ? callArgs : [];
+    this.analyze = Analyzer.analyzeSelfInvokingFunctionNode;
     this.codegen = Codegen.generateSelfInvokingFunctionCode;
   },
 

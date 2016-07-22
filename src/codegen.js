@@ -20,6 +20,7 @@ function generateArgumentCode(args) {
 }
 
 module.exports = {
+  // TODO: top level should probably just be a function node so we don't need a list
   generate: function(ast) {
     var output = "";
     for (var i = 0; i < ast.length; i++) {
@@ -33,7 +34,12 @@ module.exports = {
   },
 
   generateVariableExpressionCode: function() {
-    return this.name;
+    var code = "";
+    if (this.localToScope) {
+      code += "var ";
+    }
+    code += this.name;
+    return code;
   },
 
   generateBinaryExpressionCode: function() {

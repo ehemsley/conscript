@@ -1,5 +1,6 @@
 const Lexer = require('./lexer.js');
 const Parser = require('./parser.js');
+const Analyzer = require('./analyzer.js');
 const Codegen = require('./codegen.js');
 const Beautify = require('js-beautify').js_beautify;
 
@@ -7,6 +8,7 @@ module.exports = {
   compile: function(string) {
     var tokens = Lexer.tokenize(string);
     var ast = Parser.parse(tokens);
+    Analyzer.analyze(ast); //fold this into the code generator?
     var code = Codegen.generate(ast);
     var pretty_code = Beautify(code, { indent_size: 2 });
     return pretty_code + "\n";

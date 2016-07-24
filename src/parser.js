@@ -68,7 +68,7 @@ module.exports = {
       nextToken();
       var arguments = [];
       if (currentToken.code != Token.RIGHT_PAREN) {
-        while (1) {
+        while (true) {
           var arg;
           if (arg = parseExpression()) {
             arguments.push(arg);
@@ -223,6 +223,18 @@ module.exports = {
       }
     }
 
+    function parseReturnStatement() {
+      nextToken();
+
+      if (e = parseExpression()) {
+        return new ast.ReturnStatementNode(e);
+      } else {
+        Logger.LogError("error: expected expression");
+        return null;
+      }
+    }
+
+    //this needs a rework, too much if-else
     function parsePrimary() {
       if (currentToken.code == Token.ID) {
         return parseIdentifierExpression();
@@ -238,6 +250,8 @@ module.exports = {
         return parseDefinition();
       } else if (currentToken.code === Token.PRINT_KEYWORD) {
         return parsePrintStatement();
+      } else if (currentToken.code === Token.RETURN_KEYWORD) {
+        return parseReturnStatement();
       } else {
         return null;
       }

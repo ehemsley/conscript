@@ -152,10 +152,17 @@ describe('parser', function() {
     });
 
     describe('print statements', function() {
-      it('should print a variable', function() {
+      it('should parse a print statement', function() {
         var result = parser.parse(lexer.tokenize("print a"));
         assert.equal(result.body.expressions[0].expression.name, 'a');
       });
     });
+
+    describe('return statements', function() {
+      it('should parse a return statement', function() {
+        var result = parser.parse(lexer.tokenize("return a"));
+        assert.equal(result.body.expressions[0].expression.name, 'a');
+      })
+    })
   });
 });

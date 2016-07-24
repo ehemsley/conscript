@@ -259,6 +259,17 @@ describe('lexer', function() {
       });
     });
 
+    describe('return', function() {
+      var tokens = lexer.tokenize("function add(a,b) return a + b end");
+      it('should generate the correct lexeme for the return keyword', function() {
+        assert.equal(tokens[7].lexeme, 'return');
+      });
+
+      it('should generate the correct token coe for the return keyword', function() {
+        assert.equal(tokens[7].code, Token.RETURN_KEYWORD);
+      });
+    });
+
     describe('point', function() {
       var tokens = lexer.tokenize("myArray.push");
       it('should generate the correct lexeme for the point', function() {

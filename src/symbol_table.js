@@ -17,6 +17,16 @@ SymbolTable.prototype.lookup = function(symbol) {
   }
 }
 
+SymbolTable.prototype.functionLookup = function(symbol) {
+  if (this.symbols.has(symbol)) {
+    return this.symbols.get(symbol);
+  } else if (this.parent !== null) {
+    return this.parent.functionLookup(symbol);
+  } else {
+    return false;
+  }
+}
+
 SymbolTable.prototype.generateDeclarations = function() {
   if (this.symbols.length === 0) { return ""; }
 

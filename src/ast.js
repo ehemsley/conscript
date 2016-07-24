@@ -26,9 +26,11 @@ module.exports = {
     this.codegen = Codegen.generateBinaryExpressionCode;
   },
 
-  CallExpressionNode: function(callee, args) {
-    this.callee = callee;
+  CallExpressionNode: function(callee_name, args) {
+    this.callee_name = callee_name;
     this.args = args;
+    this.callee = null;
+    this.analyze = Analyzer.analyzeCallExpressionNode;
     this.codegen = Codegen.generateCallExpressionCode;
   },
 
@@ -38,7 +40,6 @@ module.exports = {
     this.codegen = Codegen.generateExpressionSequenceCode;
   },
 
-  //sort of want to rename this as it's not really a "prototype"
   FunctionSignatureNode: function(name, args) {
     this.name = name;
     this.args = args;
@@ -48,6 +49,7 @@ module.exports = {
   FunctionNode: function(signature, body) {
     this.signature = signature;
     this.body = body;
+    this.analyze = Analyzer.analyzeFunctionNode;
     this.codegen = Codegen.generateFunctionCode;
   },
 
@@ -90,5 +92,11 @@ module.exports = {
     this.expression = expression;
     this.analyze = function(){};
     this.codegen = Codegen.generatePrintStatementNode;
+  },
+
+  ReturnStatementNode: function(expression) {
+    this.expression = expression;
+    this.analyze = function(){};
+    this.codegen = Codegen.generateReturnStatementNode;
   }
 }

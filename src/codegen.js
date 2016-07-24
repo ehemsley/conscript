@@ -58,7 +58,7 @@ module.exports = {
   generateCallExpressionCode: function() {
     var code = this.callee.signature.name + "(";
     code += generateArgumentCode(this.args);
-    code += ");";
+    code += ")";
     return code;
   },
 
@@ -136,6 +136,11 @@ module.exports = {
 
   generatePrintStatementNode: function() {
     var code = "console.log(" + this.expression.codegen() + ")";
+    return code;
+  },
+
+  generateReturnStatementNode: function() {
+    var code = "return " + this.expression.codegen();
     return code;
   }
 }

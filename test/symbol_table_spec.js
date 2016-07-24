@@ -1,5 +1,6 @@
 const expect = require('chai').expect;
 
+const ast = require('../src/ast.js');
 const SymbolTable = require('../src/symbol_table.js');
 
 describe('symbolTable', function() {
@@ -31,6 +32,16 @@ describe('symbolTable', function() {
     it('does not find an inner scoped variable starting from the global scope', function() {
       expect(globalSymbolTable.lookup('scopedVar')).to.equal(false);
     })
+  });
+
+  describe('functionLookup', function() {
+    var symbolTable = new SymbolTable(null);
+    var expression = new ast.ExpressionSequenceNode([new ast.PrintStatementNode(new ast.NumberExpressionNode(1))]);
+    var functionNode = new ast.FunctionNode('printOne', expression);
+    symbolTable.addSymbol('printOne', functionNode);
+    it('finds the function node from the name using lookup', function() {
+      expect(symbolTable.functionLookup('printOne')).to.equal(functionNode);
+    });
   });
 
   describe('generateDeclarations', function() {

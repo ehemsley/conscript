@@ -49,8 +49,8 @@ describe('ast', function() {
     var arg2 = new ast.NumberExpressionNode(2);
     var callExpressionNode = new ast.CallExpressionNode("identifier", [arg1, arg2]);
 
-    it('should set the callee', function() {
-      assert.equal(callExpressionNode.callee, "identifier");
+    it('should set the callee name', function() {
+      assert.equal(callExpressionNode.callee_name, "identifier");
     })
 
     it('should set the arguments', function() {
@@ -75,7 +75,7 @@ describe('ast', function() {
   });
 
   describe('FunctionNode', function() {
-    var functionSignatureNode = new  ast.FunctionSignatureNode("name", []);
+    var functionSignatureNode = new ast.FunctionSignatureNode("name", []);
     var body = new ast.NumberExpressionNode(5);
     var functionNode = new ast.FunctionNode(functionSignatureNode, body);
 
@@ -85,6 +85,15 @@ describe('ast', function() {
 
     it('should set the body reference', function() {
       assert.equal(functionNode.body, body);
+    });
+  });
+
+  describe('ReturnStatementNode', function() {
+    var variable = new ast.VariableExpressionNode('a');
+    var returnStatementNode = new ast.ReturnStatementNode(variable);
+
+    it('should set the expression reference', function() {
+      assert.equal(returnStatementNode.expression.name, 'a');
     });
   });
 });

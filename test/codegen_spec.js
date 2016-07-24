@@ -59,22 +59,25 @@ describe('codegen', function() {
     it('should generate proper code for a function call with no arguments', function() {
       var signatureNode = new ast.FunctionSignatureNode("destroy", []);
       var functionNode = new ast.FunctionNode(signatureNode, []);
-      var callExpressionNode = new ast.CallExpressionNode(functionNode, []);
-      expect(callExpressionNode.codegen()).to.equal('destroy();');
+      var callExpressionNode = new ast.CallExpressionNode('destroy', []);
+      callExpressionNode.callee = functionNode;
+      expect(callExpressionNode.codegen()).to.equal('destroy()');
     });
 
     it('should generate proper code for a function call with one argument', function() {
       var signatureNode = new ast.FunctionSignatureNode("square", [new ast.VariableExpressionNode('value')]);
       var functionNode = new ast.FunctionNode(signatureNode, []);
       var callExpressionNode = new ast.CallExpressionNode(functionNode, [new ast.NumberExpressionNode(3)]);
-      expect(callExpressionNode.codegen()).to.equal('square(3);');
+      callExpressionNode.callee = functionNode;
+      expect(callExpressionNode.codegen()).to.equal('square(3)');
     });
 
     it('should generate proper code for a function call with two arguments', function() {
       var signatureNode = new ast.FunctionSignatureNode("pow", [new ast.VariableExpressionNode('base'), new ast.VariableExpressionNode('exp')]);
       var functionNode = new ast.FunctionNode(signatureNode, []);
       var callExpressionNode = new ast.CallExpressionNode(functionNode, [new ast.NumberExpressionNode(3), new ast.NumberExpressionNode(2)]);
-      expect(callExpressionNode.codegen()).to.equal('pow(3, 2);');
+      callExpressionNode.callee = functionNode;
+      expect(callExpressionNode.codegen()).to.equal('pow(3, 2)');
     });
   });
 
@@ -249,6 +252,13 @@ describe('codegen', function() {
     it('should generate correct code for a simple print statement', function() {
       var printStatement = new ast.PrintStatementNode(new ast.VariableExpressionNode('a'));
       expect(printStatement.codegen()).to.equal('console.log(a)');
+    });
+  });
+
+  describe('ReturnStatementNode', function() {
+    it('should generate correct code for a simple return statement', function() {
+      var returnStatement = new ast.ReturnStatementNode(new ast.VariableExpressionNode('a'));
+      expect(returnStatement.codegen()).to.equal('return a');
     });
   });
 });

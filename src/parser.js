@@ -68,7 +68,7 @@ module.exports = {
       nextToken();
       var args = [];
       if (currentToken.code != Token.RIGHT_PAREN) {
-        while (true) {
+        while (currentToken !== undefined) {
           var arg;
           if (arg = parseExpression()) {
             args.push(arg);
@@ -106,7 +106,7 @@ module.exports = {
         return new AST.ArrayNode(contents);
       }
 
-      while (true) {
+      while (currentToken !== undefined) {
         if (currentToken.code === Token.COMMA) {
           nextToken();
         } else if (currentToken.code === Token.RIGHT_BRACKET) {
@@ -192,7 +192,7 @@ module.exports = {
       if (currentToken.code === Token.BAR) {
         nextToken();
         var args = [];
-        while(true) {
+        while (currentToken !== undefined) {
           if (currentToken.code === Token.BAR) {
             nextToken();
             break;
@@ -267,7 +267,7 @@ module.exports = {
       var expressions = [];
       var e;
 
-      while (true) { // :(
+      while (currentToken !== undefined) {
         if (e = parseExpression()) {
           expressions.push(e);
           consumeNewlineTokens();
@@ -280,15 +280,17 @@ module.exports = {
     function parseExpression() {
       var left = parsePrimary();
       if (!left) { return null; }
-      if (currentToken.code == Token.THROUGH_OP) {
+      if (currentToken.code === Token.THROUGH_OP) {
         return parseListGeneratorExpression(left);
+      } else if (currentToken.code === Token.ASSIGN_OP) {
+        return parseAssignmentStatement(left);
       } else {
         return parseBinaryOperationRightSide(0, left);
       }
     }
 
     function parseBinaryOperationRightSide(expressionPrecedence, left) {
-      while (true) { //horrible
+      while (currentToken !== undefined) {
         var precedence = tokenPrecedence();
         if (precedence < expressionPrecedence) {
           return left;
@@ -309,6 +311,17 @@ module.exports = {
         }
 
         left = new AST.BinaryExpressionNode(binaryOperation.code, left, right);
+      }
+    }
+
+    function parseAssignmentStatement(left) {
+      nextToken();
+      var e = parseExpression();
+      if (e === null) {
+        Logger.LogError("error: expected expression");
+        return null;
+      } else {
+        return new AST.AssignmentStatementNode(left, e);
       }
     }
 
@@ -439,7 +452,7 @@ module.exports = {
 
     function main() {
       var expressions = [];
-      while (true) {
+      while (currentToken !== undefined) {
         consumeNewlineTokens();
         if (currentToken === undefined) {
           Logger.LogError("Error: unexpected end of file");

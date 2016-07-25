@@ -10,13 +10,19 @@ module.exports = {
 
   analyzeVariableExpressionNode: function(symbolTable) {
     if (!symbolTable.lookup(this.name)) {
-      symbolTable.addSymbol(this.name, 'variable');
+      Logger.LogError('error: variable not defined');
     }
   },
 
   analyzeBinaryExpressionNode: function(symbolTable) {
     this.left.analyze(symbolTable);
     this.right.analyze(symbolTable);
+  },
+
+  analyzeAssignmentStatementNode: function(symbolTable) {
+    if (!symbolTable.lookup(this.variable.name)) {
+      symbolTable.addSymbol(this.variable.name, 'variable');
+    }
   },
 
   analyzeCallExpressionNode: function(symbolTable) {

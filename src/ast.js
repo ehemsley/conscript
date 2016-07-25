@@ -32,6 +32,13 @@ module.exports = {
     this.codegen = Codegen.generateBinaryExpressionCode;
   },
 
+  AssignmentStatementNode: function(variable, expression) {
+    this.variable = variable;
+    this.expression = expression;
+    this.analyze = Analyzer.analyzeAssignmentStatementNode;
+    this.codegen = Codegen.generateAssignmentStatementNode;
+  },
+
   CallExpressionNode: function(callee_name, args) {
     this.callee_name = callee_name;
     this.args = args;

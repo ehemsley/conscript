@@ -23,10 +23,6 @@ describe('parser', function() {
         assert.equal(parser.parse(Lexer.tokenize("12+4"), false).body.expressions[0].operator, Token.ADD_OP);
       });
 
-      it('should parse a simple identifier expression', function() {
-        assert.equal(parser.parse(Lexer.tokenize("identifier = 1234"), false).body.expressions[0].operator, Token.ASSIGN_OP);
-      });
-
       it('should correctly parse multiple binary operations with descending precedence', function() {
         var result = parser.parse(Lexer.tokenize("12 / 24 + 3"), false);
         assert.equal(result.body.expressions[0].operator, Token.ADD_OP);
@@ -34,9 +30,10 @@ describe('parser', function() {
       });
 
       it('should correctly parse multiple binary operations with ascending precedence', function() {
-        var result = parser.parse(Lexer.tokenize("myVar = a + 3"), false);
-        assert.equal(result.body.expressions[0].operator, Token.ASSIGN_OP);
-        assert.equal(result.body.expressions[0].right.operator, Token.ADD_OP);
+        var result = parser.parse(Lexer.tokenize("myVar + a / 3"), false);
+        console.log(result.body.expressions[0]);
+        assert.equal(result.body.expressions[0].operator, Token.ADD_OP);
+        assert.equal(result.body.expressions[0].right.operator, Token.DIV_OP);
       });
 
       it('should correctly parse a comparison operation', function() {
@@ -45,57 +42,65 @@ describe('parser', function() {
       });
     });
 
+    describe('assignment node', function() {
+      it('should parse an assignment', function() {
+        var result = parser.parse(Lexer.tokenize("a = 2"));
+        assert.equal(result.body.expressions[0].variable.name, 'a');
+        assert.equal(result.body.expressions[0].expression.value, 2);
+      });
+    });
+
     describe('arrays', function() {
       it('should parse an empty array definition', function() {
         var result = parser.parse(Lexer.tokenize("myArray = []"));
-        assert.deepEqual(result.body.expressions[0].right.contents, []);
+        assert.deepEqual(result.body.expressions[0].expression.contents, []);
       });
 
       it('should parse an array definition with one number', function() {
         var result = parser.parse(Lexer.tokenize("myArray = [4]"));
-        assert.equal(result.body.expressions[0].right.contents[0].value, 4);
+        assert.equal(result.body.expressions[0].expression.contents[0].value, 4);
       });
 
       it('should parse an array definition with multiple numbers', function() {
         var result = parser.parse(Lexer.tokenize("myArray = [2,3,4]"));
-        assert.equal(result.body.expressions[0].right.contents[0].value, 2);
-        assert.equal(result.body.expressions[0].right.contents[1].value, 3);
-        assert.equal(result.body.expressions[0].right.contents[2].value, 4);
+        assert.equal(result.body.expressions[0].expression.contents[0].value, 2);
+        assert.equal(result.body.expressions[0].expression.contents[1].value, 3);
+        assert.equal(result.body.expressions[0].expression.contents[2].value, 4);
       });
 
       it('should parse array of variables', function() {
         var result = parser.parse(Lexer.tokenize("myArray = [a,b,c]"));
-        assert.equal(result.body.expressions[0].right.contents[0].name, 'a');
-        assert.equal(result.body.expressions[0].right.contents[1].name, 'b');
-        assert.equal(result.body.expressions[0].right.contents[2].name, 'c');
+        assert.equal(result.body.expressions[0].expression.contents[0].name, 'a');
+        assert.equal(result.body.expressions[0].expression.contents[1].name, 'b');
+        assert.equal(result.body.expressions[0].expression.contents[2].name, 'c');
       });
 
       it('should parse array of anonymous functions', function() {
         var result = parser.parse(Lexer.tokenize("myFunctionArray = [function(a) a*2 end, function(b) b * 5 end]"));
-        assert.equal(result.body.expressions[0].right.contents[0].body.expressions[0].right.value, 2);
-        assert.equal(result.body.expressions[0].right.contents[0].body.expressions[0].left.name, 'a');
-        assert.equal(result.body.expressions[0].right.contents[1].body.expressions[0].right.value, 5);
-        assert.equal(result.body.expressions[0].right.contents[1].body.expressions[0].left.name, 'b');
+        assert.equal(result.body.expressions[0].expression.contents[0].body.expressions[0].right.value, 2);
+        assert.equal(result.body.expressions[0].expression.contents[0].body.expressions[0].left.name, 'a');
+        assert.equal(result.body.expressions[0].expression.contents[1].body.expressions[0].right.value, 5);
+        assert.equal(result.body.expressions[0].expression.contents[1].body.expressions[0].left.name, 'b');
       });
     });
 
     describe('list generator', function () {
       it('should correctly parse a list generator using the through op', function() {
         var result = parser.parse(Lexer.tokenize("myArray = 1..5"));
-        assert.equal(result.body.expressions[0].right.left.value, 1);
-        assert.equal(result.body.expressions[0].right.right.value, 5);
+        assert.equal(result.body.expressions[0].expression.left.value, 1);
+        assert.equal(result.body.expressions[0].expression.right.value, 5);
       });
 
       it('should correctly parse a list generator wrapped in parens', function() {
         var result = parser.parse(Lexer.tokenize("myArray = (1..5)"));
-        assert.equal(result.body.expressions[0].right.left.value, 1);
-        assert.equal(result.body.expressions[0].right.right.value, 5);
+        assert.equal(result.body.expressions[0].expression.left.value, 1);
+        assert.equal(result.body.expressions[0].expression.right.value, 5);
       });
 
       it('should correctly parse a list generator that uses variables', function() {
         var result = parser.parse(Lexer.tokenize("myArray = three..five"));
-        assert.equal(result.body.expressions[0].right.left.name, 'three');
-        assert.equal(result.body.expressions[0].right.right.name, 'five');
+        assert.equal(result.body.expressions[0].expression.left.name, 'three');
+        assert.equal(result.body.expressions[0].expression.right.name, 'five');
       });
 
       it('should correctly parse a list generator that uses a where conditional', function() {

@@ -43,6 +43,10 @@ module.exports = {
     return this.left.codegen() + " " + operatorCode + " " + this.right.codegen();
   },
 
+  generateAssignmentStatementNode: function() {
+    return this.variable.codegen() + " = " + this.expression.codegen();
+  },
+
   generateExpressionSequenceCode: function(finalShouldReturn) {
     var code = "";
     for (var i = 0; i < this.expressions.length; i++) {

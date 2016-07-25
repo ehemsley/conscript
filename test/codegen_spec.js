@@ -3,7 +3,7 @@ const expect = require('chai').expect;
 const Token = require('../src/token.js');
 const AST = require('../src/ast.js');
 const parser = require('../src/parser.js');
-const Lexer = require('../src/Lexer.js');
+const Lexer = require('../src/lexer.js');
 const Codegen = require('../src/codegen.js');
 
 describe('codegen', function() {
@@ -53,6 +53,13 @@ describe('codegen', function() {
     it('should generate proper code with comparison operation', function() {
       var comparisonExpression = new AST.BinaryExpressionNode(Token.COMPARISON_OP, new AST.VariableExpressionNode("id"), new AST.NumberExpressionNode(6));
       expect(comparisonExpression.codegen()).to.equal('id === 6');
+    });
+  });
+
+  describe('generateAssignmentStatementNode', function() {
+    it('should generate proper code for an assignment statement', function() {
+      var assignmentStatement = new AST.AssignmentStatementNode(new AST.VariableExpressionNode('myVar'), new AST.NumberExpressionNode(3));
+      expect(assignmentStatement.codegen()).to.equal('myVar = 3');
     });
   });
 
@@ -150,7 +157,7 @@ describe('codegen', function() {
     });
 
     it('should generate proper self invoking function code with expression sequence and one argument', function() {
-      var firstExpression = new AST.BinaryExpressionNode(Token.ASSIGN_OP, new AST.VariableExpressionNode("myVar"), new AST.NumberExpressionNode(3));
+      var firstExpression = new AST.AssignmentStatementNode(new AST.VariableExpressionNode("myVar"), new AST.NumberExpressionNode(3));
       var secondExpression = new AST.BinaryExpressionNode(Token.ADD_OP, new AST.VariableExpressionNode("myVar"), new AST.VariableExpressionNode("givenVar"));
       var expressionSequenceNode = new AST.ExpressionSequenceNode([firstExpression, secondExpression]);
       var selfInvokingFunctionNode = new AST.SelfInvokingFunctionNode(expressionSequenceNode, [new AST.VariableExpressionNode("givenVar")], [new AST.NumberExpressionNode(2)]);

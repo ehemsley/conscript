@@ -3,6 +3,12 @@ const Analyzer = require('./analyzer.js');
 const Codegen = require('./codegen.js');
 const Logger = require('./logger.js');
 
+function StatementNode(node, expression, codegenFunction) {
+  node.expression = expression;
+  node.analyze = function(){};
+  node.codegen = codegenFunction;
+}
+
 module.exports = {
   NumberExpressionNode: function(value) {
     this.value = value;
@@ -89,14 +95,10 @@ module.exports = {
   },
 
   PrintStatementNode: function(expression) {
-    this.expression = expression;
-    this.analyze = function(){};
-    this.codegen = Codegen.generatePrintStatementNode;
+    StatementNode(this, expression, Codegen.generatePrintStatementNode);
   },
 
   ReturnStatementNode: function(expression) {
-    this.expression = expression;
-    this.analyze = function(){};
-    this.codegen = Codegen.generateReturnStatementNode;
+    StatementNode(this, expression, Codegen.generateReturnStatementNode);
   }
 }

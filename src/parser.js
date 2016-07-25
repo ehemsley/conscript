@@ -2,7 +2,7 @@
 // to test the parts individually. need to think of a better
 // design.
 
-const AST = require('./AST.js');
+const AST = require('./ast.js');
 const Token = require('./token.js');
 const Logger = require('./logger.js');
 

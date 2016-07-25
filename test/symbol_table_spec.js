@@ -1,6 +1,6 @@
 const expect = require('chai').expect;
 
-const AST = require('../src/AST.js');
+const AST = require('../src/ast.js');
 const SymbolTable = require('../src/symbol_table.js');
 
 describe('symbolTable', function() {

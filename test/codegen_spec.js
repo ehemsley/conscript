@@ -1,7 +1,7 @@
 const expect = require('chai').expect;
 
 const Token = require('../src/token.js');
-const AST = require('../src/AST.js');
+const AST = require('../src/ast.js');
 const parser = require('../src/parser.js');
 const Lexer = require('../src/Lexer.js');
 const Codegen = require('../src/codegen.js');

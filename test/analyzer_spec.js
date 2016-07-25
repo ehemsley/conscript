@@ -2,7 +2,7 @@ const expect = require('chai').expect;
 
 const Analyzer = require('../src/analyzer.js');
 const SymbolTable = require('../src/symbol_table.js');
-const AST = require('../src/AST.js');
+const AST = require('../src/ast.js');
 
 describe('Analyzer', function() {
   describe('analyzeVariableExpressionNode', function() {

@@ -1,6 +1,6 @@
 var assert = require('chai').assert;
 
-const AST = require('../src/AST.js');
+const AST = require('../src/ast.js');
 
 describe('AST', function() {
   describe('NumberExpressionNode', function() {

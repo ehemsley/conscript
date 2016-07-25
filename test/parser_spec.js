@@ -1,7 +1,7 @@
 var assert = require('chai').assert;
 const Token = require('../src/token.js');
 const parser = require('../src/parser.js');
-const Lexer = require('../src/Lexer.js');
+const Lexer = require('../src/lexer.js');
 const Logger = require('../src/logger.js');
 
 describe('parser', function() {

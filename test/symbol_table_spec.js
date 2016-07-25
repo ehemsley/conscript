@@ -1,6 +1,6 @@
 const expect = require('chai').expect;
 
-const ast = require('../src/ast.js');
+const AST = require('../src/AST.js');
 const SymbolTable = require('../src/symbol_table.js');
 
 describe('symbolTable', function() {
@@ -36,8 +36,8 @@ describe('symbolTable', function() {
 
   describe('functionLookup', function() {
     var symbolTable = new SymbolTable(null);
-    var expression = new ast.ExpressionSequenceNode([new ast.PrintStatementNode(new ast.NumberExpressionNode(1))]);
-    var functionNode = new ast.FunctionNode('printOne', expression);
+    var expression = new AST.ExpressionSequenceNode([new AST.PrintStatementNode(new AST.NumberExpressionNode(1))]);
+    var functionNode = new AST.FunctionNode('printOne', expression);
     symbolTable.addSymbol('printOne', functionNode);
     it('finds the function node from the name using lookup', function() {
       expect(symbolTable.functionLookup('printOne')).to.equal(functionNode);

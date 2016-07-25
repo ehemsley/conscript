@@ -2,7 +2,7 @@
 // to test the parts individually. need to think of a better
 // design.
 
-const ast = require('./ast.js');
+const AST = require('./AST.js');
 const Token = require('./token.js');
 const Logger = require('./logger.js');
 
@@ -38,12 +38,12 @@ module.exports = {
         if (currentToken.code === Token.NUM) {
           var decimalComponent = currentToken.lexeme;
           nextToken();
-          return new ast.NumberExpressionNode(number + '.' + decimalComponent);
+          return new AST.NumberExpressionNode(number + '.' + decimalComponent);
         } else {
-          return new ast.NumberExpressionNode(number)
+          return new AST.NumberExpressionNode(number)
         }
       } else {
-        return new ast.NumberExpressionNode(number);
+        return new AST.NumberExpressionNode(number);
       }
     }
 
@@ -63,15 +63,15 @@ module.exports = {
       identifier_name = currentToken.lexeme;
       nextToken();
       if (currentToken.code != Token.LEFT_PAREN) {
-        return new ast.VariableExpressionNode(identifier_name);
+        return new AST.VariableExpressionNode(identifier_name);
       }
       nextToken();
-      var arguments = [];
+      var args = [];
       if (currentToken.code != Token.RIGHT_PAREN) {
         while (true) {
           var arg;
           if (arg = parseExpression()) {
-            arguments.push(arg);
+            args.push(arg);
           } else {
             return null;
           }
@@ -91,7 +91,7 @@ module.exports = {
 
       nextToken();
 
-      return new ast.CallExpressionNode(identifier_name, arguments);
+      return new AST.CallExpressionNode(identifier_name, args);
     }
 
     function parseBracketExpression() {
@@ -103,7 +103,7 @@ module.exports = {
         contents.push(e);
       } else if (currentToken.code === Token.RIGHT_BRACKET) {
         nextToken();
-        return new ast.ArrayNode(contents);
+        return new AST.ArrayNode(contents);
       }
 
       while (true) {
@@ -111,7 +111,7 @@ module.exports = {
           nextToken();
         } else if (currentToken.code === Token.RIGHT_BRACKET) {
           nextToken();
-          return new ast.ArrayNode(contents);
+          return new AST.ArrayNode(contents);
         } else if (e = parseExpression()) {
           contents.push(e);
         } else {
@@ -128,7 +128,7 @@ module.exports = {
         return null;
       }
 
-      var elementIdentifier = new ast.VariableExpressionNode(currentToken.lexeme);
+      var elementIdentifier = new AST.VariableExpressionNode(currentToken.lexeme);
       nextToken();
 
       if (currentToken.code !== Token.IN_KEYWORD) {
@@ -140,8 +140,8 @@ module.exports = {
 
       var listExpression;
       if (listExpression = parseExpression()) {
-        if (!(listExpression instanceof ast.ListGeneratorNode ||
-              listExpression instanceof ast.VariableExpressionNode))
+        if (!(listExpression instanceof AST.ListGeneratorNode ||
+              listExpression instanceof AST.VariableExpressionNode))
         {
           Logger.LogError("error: expected expression to be a list generator or identifier");
           return null;
@@ -153,7 +153,7 @@ module.exports = {
 
       var p;
       if (p = parseClosure()) {
-        return new ast.ForLoopNode(elementIdentifier, listExpression, p);
+        return new AST.ForLoopNode(elementIdentifier, listExpression, p);
       } else {
         Logger.LogError("error: expected closure");
         return null;
@@ -181,7 +181,7 @@ module.exports = {
           return null;
         }
         nextToken();
-        return new ast.ClosureNode(args, s);
+        return new AST.ClosureNode(args, s);
       } else {
         Logger.LogError("error: expected expression sequence");
         return null;
@@ -216,7 +216,7 @@ module.exports = {
       nextToken();
 
       if (e = parseExpression()) {
-        return new ast.PrintStatementNode(e);
+        return new AST.PrintStatementNode(e);
       } else {
         Logger.LogError("error: expected expression");
         return null;
@@ -227,7 +227,7 @@ module.exports = {
       nextToken();
 
       if (e = parseExpression()) {
-        return new ast.ReturnStatementNode(e);
+        return new AST.ReturnStatementNode(e);
       } else {
         Logger.LogError("error: expected expression");
         return null;
@@ -272,7 +272,7 @@ module.exports = {
           expressions.push(e);
           consumeNewlineTokens();
         } else {
-          return new ast.ExpressionSequenceNode(expressions);
+          return new AST.ExpressionSequenceNode(expressions);
         }
       }
     }
@@ -308,7 +308,7 @@ module.exports = {
           if (!right) { return null; }
         }
 
-        left = new ast.BinaryExpressionNode(binaryOperation.code, left, right);
+        left = new AST.BinaryExpressionNode(binaryOperation.code, left, right);
       }
     }
 
@@ -317,9 +317,9 @@ module.exports = {
 
       var right;
       if (currentToken.code === Token.ID) {
-        right = new ast.VariableExpressionNode(currentToken.lexeme);
+        right = new AST.VariableExpressionNode(currentToken.lexeme);
       } else if (currentToken.code === Token.NUM) {
-        right = new ast.NumberExpressionNode(currentToken.lexeme);
+        right = new AST.NumberExpressionNode(currentToken.lexeme);
       } else {
         Logger.LogError("error: expected id or variable");
         return null;
@@ -327,7 +327,7 @@ module.exports = {
 
       nextToken();
 
-      var increment = new ast.NumberExpressionNode(1);
+      var increment = new AST.NumberExpressionNode(1);
       if (currentToken.code === Token.BY_KEYWORD) {
         nextToken();
         var id;
@@ -353,7 +353,7 @@ module.exports = {
         }
       }
 
-      return new ast.ListGeneratorNode(left, right, increment, conditionalClosure);
+      return new AST.ListGeneratorNode(left, right, increment, conditionalClosure);
     }
 
     function parseFunctionSignature() {
@@ -375,7 +375,7 @@ module.exports = {
 
       while (parsingArgs) {
         if (nextToken().code === Token.ID) {
-          argumentNames.push(new ast.VariableExpressionNode(currentToken.lexeme));
+          argumentNames.push(new AST.VariableExpressionNode(currentToken.lexeme));
           if (nextToken().code !== Token.COMMA) {
             parsingArgs = false;
           }
@@ -391,7 +391,7 @@ module.exports = {
 
       consumeNewlineTokens();
 
-      return new ast.FunctionSignatureNode(functionName, argumentNames);
+      return new AST.FunctionSignatureNode(functionName, argumentNames);
     }
 
     function parseDefinition() {
@@ -406,7 +406,7 @@ module.exports = {
           return null;
         }
         nextToken();
-        return new ast.FunctionNode(signature, s);
+        return new AST.FunctionNode(signature, s);
       }
       return null;
     }
@@ -445,7 +445,7 @@ module.exports = {
           Logger.LogError("Error: unexpected end of file");
           return null;
         } else if (currentToken.code === Token.EOF) {
-          return new ast.SelfInvokingFunctionNode(new ast.ExpressionSequenceNode(expressions));
+          return new AST.SelfInvokingFunctionNode(new AST.ExpressionSequenceNode(expressions));
         } else if (currentToken.code === Token.FUNCTION_KEYWORD) {
           expressions.push(handleDefinition());
         } else {

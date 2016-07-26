@@ -170,6 +170,8 @@ module.exports = {
     }
 
     function parseClosure() {
+      if (currentToken.code === Token.LAMBDA_KEYWORD) nextToken();
+
       var args = [];
       var a;
       if (a = parseClosureArgs()) {
@@ -201,13 +203,25 @@ module.exports = {
             nextToken();
             break;
           } else {
-            var v;
-            if (v = parseIdentifierExpression()) {
-              args.push(v);
-            } else {
+            var v = parseExpression();
+            if (v === null) {
               Logger.LogError("error: expected variable identifier");
               return null;
+
             }
+            args.push(v);
+
+            if (currentToken.code === Token.RIGHT_PAREN) {
+              nextToken();
+              break;
+            }
+
+            if (currentToken.code !== Token.COMMA) {
+              Logger.LogError("expected ')' or ',' in argument list");
+              return null;
+            }
+
+            nextToken();
           }
         }
         return args;
@@ -250,6 +264,8 @@ module.exports = {
         return parseBracketExpression();
       } else if (currentToken.code === Token.FOR_KEYWORD) {
         return parseForLoop();
+      } else if (currentToken.code === Token.LAMBDA_KEYWORD) {
+        return parseClosure();
       } else if (currentToken.code === Token.FUNCTION_KEYWORD) {
         return parseDefinition();
       } else if (currentToken.code === Token.PRINT_KEYWORD) {

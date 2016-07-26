@@ -37,7 +37,8 @@ const RESERVED_WORD_TO_TOKEN = new Map([
   ["where", Token.WHERE_KEYWORD],
   ["by", Token.BY_KEYWORD],
   ["return", Token.RETURN_KEYWORD],
-  ["or", Token.OR_KEYWORD]
+  ["or", Token.OR_KEYWORD],
+  ["lambda", Token.LAMBDA_KEYWORD]
 ]);
 
 module.exports = {

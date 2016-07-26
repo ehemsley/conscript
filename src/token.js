@@ -28,5 +28,6 @@ module.exports = {
   OR_KEYWORD: -27,
   MOD_OP: -28,
   BAR: -29,
-  GREATER_THAN_OP: -30
+  GREATER_THAN_OP: -30,
+  LAMBDA_KEYWORD: -31
 }

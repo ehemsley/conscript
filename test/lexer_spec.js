@@ -67,12 +67,14 @@ describe('Lexer', function() {
     });
 
     describe('subtract', function() {
+      var tokens = Lexer.tokenize("2-1");
+      console.log(tokens);
       it('should generate the correct lexeme for a subtraction operator', function() {
-        assert.equal(tokens[5].lexeme, "-");
+        assert.equal(tokens[1].lexeme, "-");
       });
 
       it('should generate the correct token code for a subtration operator', function() {
-        assert.equal(tokens[5].code, Token.SUB_OP);
+        assert.equal(tokens[1].code, Token.SUB_OP);
       });
     });
 
@@ -270,6 +272,17 @@ describe('Lexer', function() {
       });
     });
 
+    describe('or', function() {
+      var tokens = Lexer.tokenize("a or b");
+      it('should generate the correct lexeme for the or keyword', function() {
+        assert.equal(tokens[1].lexeme, 'or');
+      });
+
+      it('should generate the correct token coe for the or keyword', function() {
+        assert.equal(tokens[1].code, Token.OR_KEYWORD);
+      });
+    });
+
     describe('point', function() {
       var tokens = Lexer.tokenize("myArray.push");
       it('should generate the correct lexeme for the point', function() {
@@ -300,6 +313,17 @@ describe('Lexer', function() {
 
       it('should generate the correct token code for the bar op', function() {
         assert.equal(tokens[0].code, Token.BAR);
+      });
+    });
+
+    describe('arrow', function() {
+      var tokens = Lexer.tokenize("(x,y) -> x+y");
+      it('should generate the correct lexeme for the arrow', function() {
+        assert.equal(tokens[5].lexeme, '->');
+      });
+
+      it('should generate the correct token code for the arrow', function() {
+        assert.equal(tokens[5].code, Token.ARROW_OP);
       });
     });
   });

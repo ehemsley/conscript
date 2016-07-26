@@ -36,7 +36,8 @@ const RESERVED_WORD_TO_TOKEN = new Map([
   ["print", Token.PRINT_KEYWORD],
   ["where", Token.WHERE_KEYWORD],
   ["by", Token.BY_KEYWORD],
-  ["return", Token.RETURN_KEYWORD]
+  ["return", Token.RETURN_KEYWORD],
+  ["or", Token.OR_KEYWORD]
 ]);
 
 module.exports = {
@@ -68,6 +69,14 @@ module.exports = {
           } else {
             Logger.LogError("LexerError: Unknown character " + currentChar);
             nextChar();
+          }
+        } else if (result === Token.SUB_OP) {
+          nextChar();
+          if (currentChar === '>') {
+            tokens.push({lexeme: '->', code: Token.ARROW_OP });
+            nextChar();
+          } else {
+            tokens.push({lexeme: '-', code: Token.SUB_OP });
           }
         } else {
           tokens.push({ lexeme: currentChar, code: result });

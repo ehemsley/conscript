@@ -75,7 +75,7 @@ describe('codegen', function() {
     it('should generate proper code for a function call with one argument', function() {
       var signatureNode = new AST.FunctionSignatureNode("square", [new AST.VariableExpressionNode('value')]);
       var functionNode = new AST.FunctionNode(signatureNode, []);
-      var callExpressionNode = new AST.CallExpressionNode(functionNode, [new AST.NumberExpressionNode(3)]);
+      var callExpressionNode = new AST.CallExpressionNode('square', [new AST.NumberExpressionNode(3)]);
       callExpressionNode.callee = functionNode;
       expect(callExpressionNode.codegen()).to.equal('square(3)');
     });
@@ -83,7 +83,7 @@ describe('codegen', function() {
     it('should generate proper code for a function call with two arguments', function() {
       var signatureNode = new AST.FunctionSignatureNode("pow", [new AST.VariableExpressionNode('base'), new AST.VariableExpressionNode('exp')]);
       var functionNode = new AST.FunctionNode(signatureNode, []);
-      var callExpressionNode = new AST.CallExpressionNode(functionNode, [new AST.NumberExpressionNode(3), new AST.NumberExpressionNode(2)]);
+      var callExpressionNode = new AST.CallExpressionNode('pow', [new AST.NumberExpressionNode(3), new AST.NumberExpressionNode(2)]);
       callExpressionNode.callee = functionNode;
       expect(callExpressionNode.codegen()).to.equal('pow(3, 2)');
     });
@@ -243,16 +243,16 @@ describe('codegen', function() {
   describe('ForLoopNode', function() {
     it('should generate correct code for a list variable', function() {
       var identifier = new AST.VariableExpressionNode('myArray');
-      var closure = new AST.ClosureNode([], new AST.ExpressionSequenceNode([new AST.VariableExpressionNode('a')]));
+      var closure = new AST.ExpressionSequenceNode([new AST.VariableExpressionNode('a')]);
       var forLoopNode = new AST.ForLoopNode(new AST.VariableExpressionNode('elt'), identifier, closure);
-      expect(forLoopNode.codegen()).to.equal('(function() {__list = myArray;for (var __i = 0; __i < __list.length; __i++) {var elt = __list[__i];(function() {return a;})();}})();');
+      expect(forLoopNode.codegen()).to.equal('(function() {__list = myArray;for (var __i = 0; __i < __list.length; __i++) {var elt = __list[__i];a;}})();');
     });
 
     it('should generate correct code for a for loop with list generator', function() {
       var listGenerator = new AST.ListGeneratorNode(new AST.NumberExpressionNode(1), new AST.NumberExpressionNode(5), new AST.NumberExpressionNode(1));
-      var closure = new AST.ClosureNode([], new AST.ExpressionSequenceNode([new AST.BinaryExpressionNode(Token.ASSIGN_OP, new AST.VariableExpressionNode('a'), new AST.VariableExpressionNode('elt'))]));
+      var closure = new AST.ExpressionSequenceNode([new AST.BinaryExpressionNode(Token.ASSIGN_OP, new AST.VariableExpressionNode('a'), new AST.VariableExpressionNode('elt'))]);
       var forLoopNode = new AST.ForLoopNode(new AST.VariableExpressionNode('elt'), listGenerator, closure);
-      expect(forLoopNode.codegen()).to.equal('(function() {__list = (function() {var __list = []; for (var __i = 1; __i <= 5; __i+=1) {__list.push(__i);} return __list;}());for (var __i = 0; __i < __list.length; __i++) {var elt = __list[__i];(function() {return a = elt;})();}})();')
+      expect(forLoopNode.codegen()).to.equal('(function() {__list = (function() {var __list = []; for (var __i = 1; __i <= 5; __i+=1) {__list.push(__i);} return __list;}());for (var __i = 0; __i < __list.length; __i++) {var elt = __list[__i];a = elt;}})();')
     });
   });
 
@@ -267,6 +267,18 @@ describe('codegen', function() {
     it('should generate correct code for a simple return statement', function() {
       var returnStatement = new AST.ReturnStatementNode(new AST.VariableExpressionNode('a'));
       expect(returnStatement.codegen()).to.equal('return a');
+    });
+  });
+
+  describe('AccessExpressionNode', function() {
+    it('should generate correct code for a simple method call', function() {
+      var varNode = new AST.VariableExpressionNode('myArray');
+      var signatureNode = new AST.FunctionSignatureNode("push", [new AST.VariableExpressionNode('val')]);
+      var functionNode = new AST.FunctionNode(signatureNode, new AST.ExpressionSequenceNode([]));
+      var callExpression = new AST.CallExpressionNode('push', [new AST.NumberExpressionNode(1)]);
+      callExpression.callee = functionNode;
+      var accessExpression = new AST.AccessExpressionNode(varNode, callExpression);
+      expect(accessExpression.codegen()).to.equal('myArray.push(1)');
     });
   });
 });

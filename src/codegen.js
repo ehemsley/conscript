@@ -8,7 +8,8 @@ const OPERATOR_TO_CODE = new Map([
   [Token.MULT_OP, "*"],
   [Token.DIV_OP, "/"],
   [Token.MOD_OP, "%"],
-  [Token.COMPARISON_OP, "==="]
+  [Token.COMPARISON_OP, "==="],
+  [Token.OR_KEYWORD, "||"]
 ]);
 
 function generateArgumentCode(args) {
@@ -60,7 +61,8 @@ module.exports = {
   },
 
   generateCallExpressionCode: function() {
-    var code = this.callee.signature.name + "(";
+    //var code = this.callee.signature.name + "(";
+    var code = this.callee_name + "(";
     code += generateArgumentCode(this.args);
     code += ")";
     return code;
@@ -133,8 +135,8 @@ module.exports = {
     code += "__list = " + this.listNode.codegen() + ";";
     code += "for (var __i = 0; __i < __list.length; __i++) {";
     code += "var " + this.elementIdentifier.codegen() + " = __list[__i];";
-    code += this.procedure.codegen();
-    code += "();}})();";
+    code += this.expressionSequence.codegen();
+    code += "}})();";
     return code;
   },
 
@@ -146,5 +148,9 @@ module.exports = {
   generateReturnStatementNode: function() {
     var code = "return " + this.expression.codegen();
     return code;
+  },
+
+  generateAccessExpressionCode: function() {
+    return this.object.codegen() + "." + this.property.codegen();
   }
 }

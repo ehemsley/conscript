@@ -55,5 +55,29 @@ module.exports = {
       this.symbolTable.addSymbol(this.signature.args[i].name, 'argument');
     }
     this.body.analyze(this.symbolTable);
+  },
+
+  analyzeForLoopNode: function(parentSymbolTable) {
+    this.listNode.analyze(parentSymbolTable);
+    this.expressionSequence.analyze(parentSymbolTable);
+  },
+
+  analyzeClosureNode: function(parentSymbolTable) {
+    this.symbolTable = new SymbolTable(parentSymbolTable);
+    for (var i = 0; i < this.args.length; i++) {
+      this.symbolTable.addSymbol(this.args[i].name, 'argument');
+    }
+    this.body.analyze(this.symbolTable);
+  },
+
+  analyzeListGeneratorNode: function(parentSymbolTable) {
+    this.left.analyze(parentSymbolTable);
+    this.right.analyze(parentSymbolTable);
+    this.increment.analyze(parentSymbolTable);
+    this.conditionalClosure.analyze(parentSymbolTable);
+  },
+
+  analyzeStatementNode: function(parentSymbolTable) {
+    this.expression.analyze(parentSymbolTable);
   }
 }

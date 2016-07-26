@@ -14,7 +14,8 @@ const PRECEDENCE = new Map([
   [Token.MOD_OP, 40],
   [Token.COMPARISON_OP, 10],
   [Token.ASSIGN_OP, 1],
-  [Token.THROUGH_OP, 60]
+  [Token.THROUGH_OP, 60],
+  [Token.OR_KEYWORD, 10]
 ]);
 
 module.exports = {
@@ -60,14 +61,14 @@ module.exports = {
     }
 
     function parseIdentifierExpression() {
-      identifier_name = currentToken.lexeme;
+      var identifier_name = currentToken.lexeme;
       nextToken();
-      if (currentToken.code != Token.LEFT_PAREN) {
+      if (currentToken.code !== Token.LEFT_PAREN) {
         return new AST.VariableExpressionNode(identifier_name);
       }
       nextToken();
       var args = [];
-      if (currentToken.code != Token.RIGHT_PAREN) {
+      if (currentToken.code !== Token.RIGHT_PAREN) {
         while (currentToken !== undefined) {
           var arg;
           if (arg = parseExpression()) {
@@ -76,11 +77,11 @@ module.exports = {
             return null;
           }
 
-          if (currentToken.code == Token.RIGHT_PAREN) {
+          if (currentToken.code === Token.RIGHT_PAREN) {
             break;
           }
 
-          if (currentToken.code != Token.COMMA) {
+          if (currentToken.code !== Token.COMMA) {
             Logger.LogError("expected ')' or ',' in argument list");
             return null;
           }
@@ -138,49 +139,52 @@ module.exports = {
 
       nextToken();
 
-      var listExpression;
-      if (listExpression = parseExpression()) {
-        if (!(listExpression instanceof AST.ListGeneratorNode ||
-              listExpression instanceof AST.VariableExpressionNode))
-        {
-          Logger.LogError("error: expected expression to be a list generator or identifier");
-          return null;
-        }
-      } else {
+      var listExpression = parseExpression();
+      if (listExpression === null) {
         Logger.LogError("error: expected expression");
         return null;
       }
 
-      var p;
-      if (p = parseClosure()) {
-        return new AST.ForLoopNode(elementIdentifier, listExpression, p);
-      } else {
-        Logger.LogError("error: expected closure");
-        return null;
-      }
-    }
-
-    function parseClosure() {
+      //could use newline as indicator token for these loops too?
       if (currentToken.code !== Token.DO_KEYWORD) {
+        Logger.LogError("error: expected do");
         return null;
       }
 
       nextToken();
+      consumeNewlineTokens();
 
+      var s = parseExpressionSequence();
+      if (s === null) {
+        Logger.LogError("error: expected closure");
+        return null;
+      }
+
+      if (currentToken.code !== Token.END_KEYWORD) {
+        Logger.LogError("error: expected end keyword");
+        return null;
+      }
+      nextToken();
+
+      return new AST.ForLoopNode(elementIdentifier, listExpression, s);
+    }
+
+    function parseClosure() {
       var args = [];
       var a;
       if (a = parseClosureArgs()) {
         args = a;
       }
 
+      if (currentToken.code !== Token.ARROW_OP) {
+        Logger.LogError("error: expected arrow after closure arguments");
+        return null;
+      }
+
+      nextToken();
       consumeNewlineTokens();
 
       if (s = parseExpressionSequence()) {
-        if (currentToken.code !== Token.END_KEYWORD) {
-          Logger.LogError("error: expected end");
-          return null;
-        }
-        nextToken();
         return new AST.ClosureNode(args, s);
       } else {
         Logger.LogError("error: expected expression sequence");
@@ -189,11 +193,11 @@ module.exports = {
     }
 
     function parseClosureArgs() {
-      if (currentToken.code === Token.BAR) {
+      if (currentToken.code === Token.LEFT_PAREN) {
         nextToken();
         var args = [];
         while (currentToken !== undefined) {
-          if (currentToken.code === Token.BAR) {
+          if (currentToken.code === Token.RIGHT_PAREN) {
             nextToken();
             break;
           } else {
@@ -280,13 +284,26 @@ module.exports = {
     function parseExpression() {
       var left = parsePrimary();
       if (!left) { return null; }
+      var rest = null;
       if (currentToken.code === Token.THROUGH_OP) {
-        return parseListGeneratorExpression(left);
+        rest = parseListGeneratorExpression(left);
       } else if (currentToken.code === Token.ASSIGN_OP) {
-        return parseAssignmentStatement(left);
+        rest = parseAssignmentStatement(left);
       } else {
-        return parseBinaryOperationRightSide(0, left);
+        rest = parseBinaryOperationRightSide(0, left);
       }
+
+      if (currentToken.code === Token.POINT) {
+        nextToken();
+        var property = parseExpression();
+        if (property === null) {
+          Logger.LogError("error: expected expression after point");
+          return null;
+        }
+        return new AST.AccessExpressionNode(rest, property);
+      }
+
+      return rest;
     }
 
     function parseBinaryOperationRightSide(expressionPrecedence, left) {
@@ -328,29 +345,21 @@ module.exports = {
     function parseListGeneratorExpression(left) {
       nextToken();
 
-      var right;
-      if (currentToken.code === Token.ID) {
-        right = new AST.VariableExpressionNode(currentToken.lexeme);
-      } else if (currentToken.code === Token.NUM) {
-        right = new AST.NumberExpressionNode(currentToken.lexeme);
-      } else {
-        Logger.LogError("error: expected id or variable");
+      var right = parseExpression();
+      if (right === null) {
+        Logger.LogError("error: expected expression");
         return null;
       }
-
-      nextToken();
 
       var increment = new AST.NumberExpressionNode(1);
       if (currentToken.code === Token.BY_KEYWORD) {
         nextToken();
-        var id;
-        if (currentToken.code === Token.ID) {
-          increment = parseIdentifierExpression();
-        } else if (currentToken.code === Token.NUM) {
-          increment = parseNumberExpression();
-        } else {
+        var expression = parseExpression();
+        if (expression === null) {
           Logger.LogError("error: expected id or number");
           return null;
+        } else {
+          increment = expression;
         }
       }
 
@@ -361,7 +370,7 @@ module.exports = {
         if (c = parseClosure()) {
           conditionalClosure = c;
         } else {
-          Logger.LogError("error: expected closure");
+          Logger.LogError("error: expected closure in where clause");
           return null;
         }
       }
@@ -396,7 +405,7 @@ module.exports = {
       }
 
       if (currentToken.code !== Token.RIGHT_PAREN) {
-        Logger.LogError("expected ')' in prototype");
+        Logger.LogError("expected ')' in signature");
         return null;
       }
 

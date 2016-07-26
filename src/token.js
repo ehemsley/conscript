@@ -25,6 +25,8 @@ module.exports = {
   WHERE_KEYWORD: -24,
   BY_KEYWORD: -25,
   RETURN_KEYWORD: -26,
-  MOD_OP: -27,
-  BAR: -28
+  OR_KEYWORD: -27,
+  MOD_OP: -28,
+  BAR: -29,
+  GREATER_THAN_OP: -30
 }

@@ -5,7 +5,7 @@ const Logger = require('./logger.js');
 
 function StatementNode(node, expression, codegenFunction) {
   node.expression = expression;
-  node.analyze = function(){};
+  node.analyze = Analyzer.analyzeStatementNode;
   node.codegen = codegenFunction;
 }
 
@@ -42,7 +42,7 @@ module.exports = {
   CallExpressionNode: function(callee_name, args) {
     this.callee_name = callee_name;
     this.args = args;
-    this.callee = null;
+    //this.callee = null;
     this.analyze = Analyzer.analyzeCallExpressionNode;
     this.codegen = Codegen.generateCallExpressionCode;
   },
@@ -84,20 +84,23 @@ module.exports = {
     this.right = right;
     this.increment = increment;
     this.conditionalClosure = conditionalClosure;
+    this.analyze = Analyzer.analyzeListGeneratorNode;
     this.codegen = Codegen.generateListGeneratorCode;
   },
 
-  ForLoopNode: function(elementIdentifier, listNode, procedure) {
+  ForLoopNode: function(elementIdentifier, listNode, s) {
     this.elementIdentifier = elementIdentifier;
     this.listNode = listNode;
-    this.procedure = procedure;
+    this.expressionSequence = s;
     this.isStatement = true;
+    this.analyze = Analyzer.analyzeForLoopNode;
     this.codegen = Codegen.generateForLoopCode;
   },
 
   ClosureNode: function(args, body) {
     this.args = args;
     this.body = body;
+    this.analyze = Analyzer.analyzeClosureNode;
     this.codegen = Codegen.generateClosureCode;
   },
 
@@ -107,5 +110,12 @@ module.exports = {
 
   ReturnStatementNode: function(expression) {
     StatementNode(this, expression, Codegen.generateReturnStatementNode);
+  },
+
+  AccessExpressionNode: function(object, property) {
+    this.object = object;
+    this.property = property;
+    this.analyze = function(){};
+    this.codegen = Codegen.generateAccessExpressionCode;
   }
 }

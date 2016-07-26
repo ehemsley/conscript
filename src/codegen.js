@@ -1,4 +1,5 @@
 const Token = require('./token.js');
+const Analyzer = require('./analyzer.js');
 
 const OPERATOR_TO_CODE = new Map([
   [Token.ASSIGN_OP, "="],
@@ -7,7 +8,8 @@ const OPERATOR_TO_CODE = new Map([
   [Token.MULT_OP, "*"],
   [Token.DIV_OP, "/"],
   [Token.MOD_OP, "%"],
-  [Token.COMPARISON_OP, "==="]
+  [Token.COMPARISON_OP, "==="],
+  [Token.OR_KEYWORD, "||"]
 ]);
 
 function generateArgumentCode(args) {
@@ -21,11 +23,8 @@ function generateArgumentCode(args) {
 
 module.exports = {
   generate: function(ast) {
-    var output = "";
-    for (var i = 0; i < ast.length; i++) {
-      output += ast[i].codegen();
-    }
-    return output;
+    Analyzer.analyze(ast);
+    return ast.codegen();
   },
 
   generateNumberExpressionCode: function() {
@@ -45,6 +44,10 @@ module.exports = {
     return this.left.codegen() + " " + operatorCode + " " + this.right.codegen();
   },
 
+  generateAssignmentStatementNode: function() {
+    return this.variable.codegen() + " = " + this.expression.codegen();
+  },
+
   generateExpressionSequenceCode: function(finalShouldReturn) {
     var code = "";
     for (var i = 0; i < this.expressions.length; i++) {
@@ -58,9 +61,10 @@ module.exports = {
   },
 
   generateCallExpressionCode: function() {
-    var code = this.callee.signature.name + "(";
+    //var code = this.callee.signature.name + "(";
+    var code = this.callee_name + "(";
     code += generateArgumentCode(this.args);
-    code += ");";
+    code += ")";
     return code;
   },
 
@@ -81,6 +85,7 @@ module.exports = {
     var code = "(function(";
     code += generateArgumentCode(this.signatureArgs);
     code += ") {";
+    code += this.symbolTable.generateDeclarations();
     code += this.body.codegen();
     code += "})("
     code += generateArgumentCode(this.callArgs);
@@ -130,13 +135,22 @@ module.exports = {
     code += "__list = " + this.listNode.codegen() + ";";
     code += "for (var __i = 0; __i < __list.length; __i++) {";
     code += "var " + this.elementIdentifier.codegen() + " = __list[__i];";
-    code += this.procedure.codegen();
-    code += "();}})();";
+    code += this.expressionSequence.codegen();
+    code += "}})();";
     return code;
   },
 
   generatePrintStatementNode: function() {
     var code = "console.log(" + this.expression.codegen() + ")";
     return code;
+  },
+
+  generateReturnStatementNode: function() {
+    var code = "return " + this.expression.codegen();
+    return code;
+  },
+
+  generateAccessExpressionCode: function() {
+    return this.object.codegen() + "." + this.property.codegen();
   }
 }

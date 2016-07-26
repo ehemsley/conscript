@@ -1,10 +1,10 @@
 var assert = require('chai').assert;
-const lexer = require('../src/lexer.js');
+const Lexer = require('../src/lexer.js');
 const Token = require('../src/token.js');
 
-describe('lexer', function() {
+describe('Lexer', function() {
   describe('tokenize', function() {
-    var tokens = lexer.tokenize("identifier = 12345 + 23456 - ((234 * 2) / 4)");
+    var tokens = Lexer.tokenize("identifier = 12345 + 23456 - ((234 * 2) / 4)");
 
     it('should generate the correct amount of tokens', function() {
       assert.lengthOf(tokens, 16);
@@ -46,7 +46,7 @@ describe('lexer', function() {
     });
 
     describe('comparison', function() {
-      var tokens = lexer.tokenize("id == 4");
+      var tokens = Lexer.tokenize("id == 4");
       it('should generate the correct lexeme for a comparison operator', function() {
         assert.equal(tokens[1].lexeme, "==");
       });
@@ -67,12 +67,14 @@ describe('lexer', function() {
     });
 
     describe('subtract', function() {
+      var tokens = Lexer.tokenize("2-1");
+      console.log(tokens);
       it('should generate the correct lexeme for a subtraction operator', function() {
-        assert.equal(tokens[5].lexeme, "-");
+        assert.equal(tokens[1].lexeme, "-");
       });
 
       it('should generate the correct token code for a subtration operator', function() {
-        assert.equal(tokens[5].code, Token.SUB_OP);
+        assert.equal(tokens[1].code, Token.SUB_OP);
       });
     });
 
@@ -97,7 +99,7 @@ describe('lexer', function() {
     });
 
     describe('mod', function() {
-      var tokens = lexer.tokenize("%");
+      var tokens = Lexer.tokenize("%");
       it('should generate the correct lexeme for a mod operator', function() {
         assert.equal(tokens[0].lexeme, "%");
       });
@@ -128,7 +130,7 @@ describe('lexer', function() {
     });
 
     describe('left bracket', function() {
-      var tokens = lexer.tokenize("myArray = [1,2]");
+      var tokens = Lexer.tokenize("myArray = [1,2]");
       it('should generate the correct lexeme for a left bracket', function() {
         assert.equal(tokens[2].lexeme, "[");
       });
@@ -139,7 +141,7 @@ describe('lexer', function() {
     });
 
     describe('right bracket', function() {
-      var tokens = lexer.tokenize("myArray = [1,2]");
+      var tokens = Lexer.tokenize("myArray = [1,2]");
       it('should generate the correct lexeme for a right bracket', function() {
         assert.equal(tokens[6].lexeme, "]");
       });
@@ -150,7 +152,7 @@ describe('lexer', function() {
     });
 
     describe('comma', function() {
-      var tokens = lexer.tokenize("myArray = [1,2]");
+      var tokens = Lexer.tokenize("myArray = [1,2]");
       it('should generate the correct lexeme for a comma', function() {
         assert.equal(tokens[4].lexeme, ",");
       });
@@ -161,7 +163,7 @@ describe('lexer', function() {
     });
 
     describe('newline', function() {
-      var tokens = lexer.tokenize("function add(a,b)\na+b\nend");
+      var tokens = Lexer.tokenize("function add(a,b)\na+b\nend");
       it('should generate the correct lexeme for a newline', function() {
         assert.equal(tokens[7].lexeme, '\n');
       });
@@ -172,7 +174,7 @@ describe('lexer', function() {
     });
 
     describe('function', function() {
-      var tokens = lexer.tokenize("function add(a,b)\na+b\nend");
+      var tokens = Lexer.tokenize("function add(a,b)\na+b\nend");
       it('should generate the correct lexeme for the function keyword', function() {
         assert.equal(tokens[0].lexeme, 'function');
       });
@@ -183,7 +185,7 @@ describe('lexer', function() {
     });
 
     describe('end', function() {
-      var tokens = lexer.tokenize("function add(a,b)\na+b\nend");
+      var tokens = Lexer.tokenize("function add(a,b)\na+b\nend");
       it('should generate the correct lexeme for the end keyword', function() {
         assert.equal(tokens[12].lexeme, 'end');
       });
@@ -194,7 +196,7 @@ describe('lexer', function() {
     });
 
     describe('for', function() {
-      var tokens = lexer.tokenize("for num in myNums");
+      var tokens = Lexer.tokenize("for num in myNums");
       it('should generate the correct lexeme for the for keyword', function() {
         assert.equal(tokens[0].lexeme, 'for');
       });
@@ -205,7 +207,7 @@ describe('lexer', function() {
     });
 
     describe('in', function() {
-      var tokens = lexer.tokenize("for num in myNums");
+      var tokens = Lexer.tokenize("for num in myNums");
       it('should generate the correct lexeme for the in keyword', function() {
         assert.equal(tokens[2].lexeme, 'in');
       });
@@ -216,7 +218,7 @@ describe('lexer', function() {
     });
 
     describe('do', function() {
-      var tokens = lexer.tokenize("for num in myNums do end");
+      var tokens = Lexer.tokenize("for num in myNums do end");
       it('should generate the correct lexeme for the do keyword', function() {
         assert.equal(tokens[4].lexeme, 'do');
       })
@@ -227,7 +229,7 @@ describe('lexer', function() {
     });
 
     describe('print', function() {
-      var tokens = lexer.tokenize("print");
+      var tokens = Lexer.tokenize("print");
       it('should generate the correct lexeme for the print keyword', function() {
         assert.equal(tokens[0].lexeme, 'print');
       });
@@ -238,7 +240,7 @@ describe('lexer', function() {
     });
 
     describe('where', function() {
-      var tokens = lexer.tokenize("i in (3..5 where do |i| i % 2 == 0 end) do i*2 end");
+      var tokens = Lexer.tokenize("i in (3..5 where do |i| i % 2 == 0 end) do i*2 end");
       it('should generate the correct lexeme for the print keyword', function() {
         assert.equal(tokens[6].lexeme, 'where');
       });
@@ -249,7 +251,7 @@ describe('lexer', function() {
     });
 
     describe('by', function() {
-      var tokens = lexer.tokenize("for i in 1..10 by 2");
+      var tokens = Lexer.tokenize("for i in 1..10 by 2");
       it('should generate the correct lexeme for the by keyword', function() {
         assert.equal(tokens[6].lexeme, 'by');
       });
@@ -259,8 +261,30 @@ describe('lexer', function() {
       });
     });
 
+    describe('return', function() {
+      var tokens = Lexer.tokenize("function add(a,b) return a + b end");
+      it('should generate the correct lexeme for the return keyword', function() {
+        assert.equal(tokens[7].lexeme, 'return');
+      });
+
+      it('should generate the correct token coe for the return keyword', function() {
+        assert.equal(tokens[7].code, Token.RETURN_KEYWORD);
+      });
+    });
+
+    describe('or', function() {
+      var tokens = Lexer.tokenize("a or b");
+      it('should generate the correct lexeme for the or keyword', function() {
+        assert.equal(tokens[1].lexeme, 'or');
+      });
+
+      it('should generate the correct token coe for the or keyword', function() {
+        assert.equal(tokens[1].code, Token.OR_KEYWORD);
+      });
+    });
+
     describe('point', function() {
-      var tokens = lexer.tokenize("myArray.push");
+      var tokens = Lexer.tokenize("myArray.push");
       it('should generate the correct lexeme for the point', function() {
         assert.equal(tokens[1].lexeme, '.');
       });
@@ -271,7 +295,7 @@ describe('lexer', function() {
     });
 
     describe('through', function() {
-      var tokens = lexer.tokenize("(1..5)");
+      var tokens = Lexer.tokenize("(1..5)");
       it('should generate the correct lexeme for the through op', function() {
         assert.equal(tokens[2].lexeme, '..');
       });
@@ -282,7 +306,7 @@ describe('lexer', function() {
     });
 
     describe('bar', function() {
-      var tokens = lexer.tokenize("|");
+      var tokens = Lexer.tokenize("|");
       it('should generate the correct lexeme for the bar op', function() {
         assert.equal(tokens[0].lexeme, '|');
       });
@@ -291,81 +315,92 @@ describe('lexer', function() {
         assert.equal(tokens[0].code, Token.BAR);
       });
     });
+
+    describe('arrow', function() {
+      var tokens = Lexer.tokenize("(x,y) -> x+y");
+      it('should generate the correct lexeme for the arrow', function() {
+        assert.equal(tokens[5].lexeme, '->');
+      });
+
+      it('should generate the correct token code for the arrow', function() {
+        assert.equal(tokens[5].code, Token.ARROW_OP);
+      });
+    });
   });
 
   describe('isValidIdentifierChar', function() {
     it('should return true if the char is a letter', function() {
-      assert.equal(lexer.isValidIdentifierChar("a"), true);
+      assert.equal(Lexer.isValidIdentifierChar("a"), true);
     });
 
     it('should return true if the char is a capital letter', function() {
-      assert.equal(lexer.isValidIdentifierChar("F"), true);
+      assert.equal(Lexer.isValidIdentifierChar("F"), true);
     });
 
     it('should return false if the char is not a letter', function() {
-      assert.equal(lexer.isValidIdentifierChar("1"), false);
+      assert.equal(Lexer.isValidIdentifierChar("1"), false);
     });
 
     it('should return true if the char is an underscore', function() {
-      assert.equal(lexer.isValidIdentifierChar('_'), true);
+      assert.equal(Lexer.isValidIdentifierChar('_'), true);
     });
 
     it('should return false if the char is undefined', function() {
-      assert.equal(lexer.isValidIdentifierChar(undefined), false);
+      assert.equal(Lexer.isValidIdentifierChar(undefined), false);
     });
 
     it('should return false if the char is a bracket', function() {
-      assert.equal(lexer.isValidIdentifierChar(']'), false);
+      assert.equal(Lexer.isValidIdentifierChar(']'), false);
     });
   });
 
   describe('isNum', function() {
     it('should return true if the char is a number', function() {
-      assert.equal(lexer.isNum("1"), true);
+      assert.equal(Lexer.isNum("1"), true);
     });
 
     it('should return false if the char is not a number', function() {
-      assert.equal(lexer.isNum("a"), false);
+      assert.equal(Lexer.isNum("a"), false);
     });
 
     it('should return false if the char is undefined', function() {
-      assert.equal(lexer.isNum(undefined), false);
+      assert.equal(Lexer.isNum(undefined), false);
     });
   });
 
   describe('isNumOrDecimalPoint', function() {
     it('should return true if the char is a decimal point', function() {
-      assert.equal(lexer.isNumOrDecimalPoint('.'), true);
+      assert.equal(Lexer.isNumOrDecimalPoint('.'), true);
     });
   })
 
   describe('isEqualsSign', function() {
     it('should return true if the char is an equals sign', function() {
-      assert.equal(lexer.isEqualsSign("="), true);
+      assert.equal(Lexer.isEqualsSign("="), true);
     });
 
     it('should return false if the char is not an equals sign', function() {
-      assert.equal(lexer.isEqualsSign("?"), false);
+      assert.equal(Lexer.isEqualsSign("?"), false);
     });
   });
 
   describe('isWhitespace', function() {
     it('should return true if the char is whitespace', function() {
-      assert.equal(lexer.isWhitespace(" "), true);
+      assert.equal(Lexer.isWhitespace(" "), true);
     });
 
     it('should return false if the char is not whitespace', function() {
-      assert.equal(lexer.isWhitespace("a"), false);
+      assert.equal(Lexer.isWhitespace("a"), false);
     });
   });
 
   describe('isReservedWord', function() {
     it('should return true if the string is a reserved word', function() {
-      assert.equal(lexer.isReservedWord("function"), true);
+      assert.equal(Lexer.isReservedWord("function"), true);
     });
 
     it('should return false if the string is not a reserved word', function() {
-      assert.equal(lexer.isReservedWord("blargh"), false);
+      assert.equal(Lexer.isReservedWord("blargh"), false);
     });
   });
 });

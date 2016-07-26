@@ -1,5 +1,6 @@
 const Lexer = require('./lexer.js');
 const Parser = require('./parser.js');
+const Analyzer = require('./analyzer.js');
 const Codegen = require('./codegen.js');
 const Beautify = require('js-beautify').js_beautify;
 
